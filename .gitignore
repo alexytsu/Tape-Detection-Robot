@@ -1,0 +1,6 @@
+venv/
+*.mp4
+__pycache__
+.vscode/
+footage/
+images/

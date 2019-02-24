@@ -5,6 +5,7 @@ Takes a video file or camera stream and allows our modules to run on it frame by
 import numpy as np 
 import cv2
 import os
+import time
 
 import mask
 
@@ -17,11 +18,18 @@ def process_video(video, process):
 	Using a pipe and filter philosophy, this module allows the user to run a function on each frame of the video being streamed
 	"""
 
-	print(f"Starting streaming {video}...")
+	print("Starting streaming video...")
 
 	# Open the video for streaming frame-by-frame
 	cap = cv2.VideoCapture(video)
+	curtime = 0
 	while cap.isOpened():
+
+		oldtime = curtime
+		curtime = int(round(time.time() * 1000))	
+		delta = curtime - oldtime
+		print("time: ", delta)
+
 		ret, frame = cap.read()
 
 		# Process each frame of the video

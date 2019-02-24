@@ -28,7 +28,7 @@ def process_video(video, process):
 		oldtime = curtime
 		curtime = int(round(time.time() * 1000))	
 		delta = curtime - oldtime
-		print("time: ", delta)
+		print("time: ", delta, "hz: ", (1/delta)*1000)
 
 		ret, frame = cap.read()
 
@@ -36,8 +36,13 @@ def process_video(video, process):
 		mutated = process(frame)
 
 		# Show the original and processed frame side by side
+		"""
 		comparison = np.hstack((frame, mutated))
 		cv2.imshow('comparison', comparison)
+		"""
+
+		#Show only the processed from
+		#cv2.imshow('processed', mutated)
 
 		# use p to pause
 		if cv2.waitKey(1) & 0xFF == ord('p'):

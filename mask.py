@@ -25,20 +25,25 @@ def mask_tapes(frame):
 	return blue_frame, yellow_frame
 
 def mask_tape(frame):
+	# get the separate blue and yellow channels
 	blue, yellow = mask_tapes(frame)
 
+	# get the masks and centroid coordinates for each tape
 	yellow, y_c = line.add_lines(yellow)
 	blue, b_c = line.add_lines(blue)
 
+	# combine the mask
 	both = blue | yellow
 
+	# kms
 	height = both.shape[0]
 	width = both.shape[1]
 
-
+	# calculate a target vector as the average of the two centroids
 	target = (int((y_c[0] + b_c[0])/2) ,int( (y_c[1] + b_c[1])/2))
 	robot = (int(width/2), int(height))
 
+	# graph the target vector for stupid humans to "visualize" god fuck
 	both = cv2.line(both, robot, target, (0, 255, 0), thickness=4)
 
 	return both

@@ -40,7 +40,7 @@ def mask_tape(frame, ser):
 	robot = (int(width/2), int(height))
 
 	angle = (115 + 60) / 2
-	if(target > width / 2):
+	if(target[0] < width / 2):
 		angle = 115
 	else:
 		angle = 60

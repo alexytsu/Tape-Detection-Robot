@@ -21,7 +21,7 @@ def process_video(video, process):
 
 	print(f"Starting streaming {video}...")
 
-	ser = serial.open("/dev/tty/ACM0")
+	ser = serial.Serial("/dev/ttyACM0")
 
 	# Open the video for streaming frame-by-frame
 	cap = cv2.VideoCapture(video)
@@ -57,7 +57,8 @@ if __name__ == "__main__":
 	# run the process with bw demo
 	try:
 		process_video(filename, mask.mask_tape)
-	except:
-		print("Terminating early")	
+	except Exception as e:
+		print("Exception ", e)
+		print("Terminating early")
 	finally:
 		print("Exiting...")

@@ -6,6 +6,8 @@ import numpy as np
 import cv2
 import os
 
+import serial
+
 import mask
 
 CUR_DIR = os.path.dirname(__file__)
@@ -19,13 +21,15 @@ def process_video(video, process):
 
 	print(f"Starting streaming {video}...")
 
+	ser = serial.open("/dev/tty/ACM0")
+
 	# Open the video for streaming frame-by-frame
 	cap = cv2.VideoCapture(video)
 	while cap.isOpened():
 		ret, frame = cap.read()
 
 		# Process each frame of the video
-		mutated = process(frame)
+		mutated = process(frame, ser)
 
 		# Show the original and processed frame side by side
 		comparison = np.hstack((frame, mutated))
@@ -47,6 +51,13 @@ def process_video(video, process):
 
 
 if __name__ == "__main__":
+	
+
 	filename = input("Filename: ")
 	# run the process with bw demo
-	process_video(filename, mask.mask_tape)
+	try:
+		process_video(filename, mask.mask_tape)
+	except:
+		print("Terminating early")	
+	finally:
+		print("Exiting...")

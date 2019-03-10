@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 
 import line
+import arduinointerface
 
 # we want these bounds to be visible to other modules
 blue_lower_bounds = np.array([int(220/2),int(255*.30),int(255*.20)])
@@ -24,7 +25,7 @@ def mask_tapes(frame):
 	yellow_frame = frame & (mask_rgb_yellow)
 	return blue_frame, yellow_frame
 
-def mask_tape(frame):
+def mask_tape(frame, ser):
 	blue, yellow = mask_tapes(frame)
 
 	yellow, y_c = line.add_lines(yellow)
@@ -35,9 +36,16 @@ def mask_tape(frame):
 	height = both.shape[0]
 	width = both.shape[1]
 
-
 	target = (int((y_c[0] + b_c[0])/2) ,int( (y_c[1] + b_c[1])/2))
 	robot = (int(width/2), int(height))
+
+	angle = (115 + 60) / 2
+	if(target > width / 2):
+		angle = 115
+	else:
+		angle = 60
+
+	arduinointerface.SendSpeed(ser, angle, 90)
 
 	both = cv2.line(both, robot, target, (0, 255, 0), thickness=4)
 

@@ -4,8 +4,8 @@ import numpy as np
 import line
 
 # we want these bounds to be visible to other modules
-blue_lower_bounds = np.array([int(174/2),int(255*.38),int(255*.58)])
-blue_upper_bounds = np.array([int(250/2), 255, 255])
+blue_lower_bounds = np.array([int(220/2),int(255*.30),int(255*.20)])
+blue_upper_bounds = np.array([int(280/2), int(255*1), int(255*.80)])
 yellow_lower_bounds = np.array([int(40/2),int(255*.38),int(255*.58)])
 yellow_upper_bounds = np.array([int(70/2), 255, 255])
 

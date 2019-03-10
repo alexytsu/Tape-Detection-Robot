@@ -47,6 +47,6 @@ def process_video(video, process):
 
 
 if __name__ == "__main__":
-
+	filename = input("Filename: ")
 	# run the process with bw demo
-	process_video(VIDEO_FILE, mask.mask_tape)
+	process_video(filename, mask.mask_tape)

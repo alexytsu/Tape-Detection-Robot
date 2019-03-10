@@ -24,8 +24,9 @@ def process_video(video, process):
 	ser = serial.Serial("/dev/ttyACM0")
 
 	# Open the video for streaming frame-by-frame
-	cap = cv2.VideoCapture(video)
-	while cap.isOpened():
+	cap = cv2.VideoCapture(5)
+
+	while True:
 		ret, frame = cap.read()
 
 		# Process each frame of the video

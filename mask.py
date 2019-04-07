@@ -18,7 +18,6 @@ def mask_tapes(frame):
 	mask_blue = cv2.inRange(frame, blue_lower_bounds, blue_upper_bounds)
 	mask_yellow = cv2.inRange(frame, yellow_lower_bounds, yellow_upper_bounds)
 
-
 	# make the masks compatible with rgb
 	mask_rgb_blue = cv2.cvtColor(mask_blue, cv2.COLOR_GRAY2BGR)
 	mask_rgb_yellow = cv2.cvtColor(mask_yellow, cv2.COLOR_GRAY2BGR)

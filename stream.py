@@ -7,6 +7,8 @@ import cv2
 import os
 import time
 
+import serial
+
 import mask
 
 CUR_DIR = os.path.dirname(__file__)
@@ -19,6 +21,8 @@ def process_video(video, process):
 	"""
 
 	print("Starting streaming video...")
+
+	ser = serial.Serial("/dev/ttyACM0")
 
 	# Open the video for streaming frame-by-frame
 	cap = cv2.VideoCapture(video)
@@ -33,7 +37,7 @@ def process_video(video, process):
 		ret, frame = cap.read()
 
 		# Process each frame of the video
-		mutated = process(frame)
+		mutated = process(frame, ser)
 
 		# Show the original and processed frame side by side
 		"""
@@ -60,6 +64,14 @@ def process_video(video, process):
 
 
 if __name__ == "__main__":
+	
 
+	filename = input("Filename: ")
 	# run the process with bw demo
-	process_video(VIDEO_FILE, mask.mask_tape)
+	try:
+		process_video(filename, mask.mask_tape)
+	except Exception as e:
+		print("Exception ", e)
+		print("Terminating early")
+	finally:
+		print("Exiting...")

@@ -1,0 +1,7 @@
+numpy==1.16.1
+opencv-python==4.0.0.21
+pyserial==3.4
+pyzmq==18.0.1
+scikit-learn==0.20.3
+scipy==1.2.1
+zmq==0.0.0

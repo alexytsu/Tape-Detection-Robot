@@ -67,12 +67,15 @@ def get_spaced_frames(filename, length, get_n):
         if(success):
             if count % spacing == 0:
                 n_frames += 1
+                print(f"Grapped frame {count}/{length}")
                 frames.append(image)
                 if n_frames >= get_n:
                     break
         else:
             break
         count += 1
+
+    print("Finished grabbing on frame:", count)
 
     return frames, n_frames
 
@@ -136,17 +139,28 @@ if __name__ == "__main__":
     gap()
     for colour in ["blue", "red", "yellow"]:
         Classifier = HMI(colour)
-        data_points = Classifier.ask_colour_data(frames[0])
-        data_matrix = np.array(data_points)
+        total_data = pd.DataFrame()
 
-        df = pd.DataFrame({
-            "H": data_matrix[:,0],
-            "S": data_matrix[:,1],
-            "V": data_matrix[:,2]
-        })
+        for frame in frames:
+            print("Click on points that are ", colour)
+            data_points = Classifier.ask_colour_data(frame)
+            data_matrix = np.array(data_points)
+
+            try:
+
+                df = pd.DataFrame({
+                    "H": data_matrix[:,0],
+                    "S": data_matrix[:,1],
+                    "V": data_matrix[:,2]
+                })
+
+                total_data = total_data.append(df)
+
+            except IndexError:
+                print("You didn't select any points")
         
         filename = colour + ".csv"
         filepath = os.path.join("training_data", filename)
-        df.to_csv(filepath)
+        total_data.to_csv(filepath)
 
 

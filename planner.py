@@ -67,7 +67,7 @@ def get_spaced_frames(filename, length, get_n):
         if(success):
             if count % spacing == 0:
                 n_frames += 1
-                print(f"Grapped frame {count}/{length}")
+                print(f"Grabbed frame {count}/{length}")
                 frames.append(image)
                 if n_frames >= get_n:
                     break

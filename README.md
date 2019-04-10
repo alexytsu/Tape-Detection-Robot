@@ -7,9 +7,13 @@ A python module written for DRC2019 competition. Uses opencv to plot a path betw
 - Ensure you are using `python3`
 - Create a virtualenvironment to store the dependencies `virtualenv venv`
 - Activate the virtual environment `source venv/bin/activate` on Linux or `.\venv\Scripts\activate` on Windows
-- Now install the dependencies (opencv)
-- `pip install python-opencv`
-- To test, you should be able to open a python3 shell and import cv2
+- Install the dependencies `pip install -r requirements.txt`
+
+### Running the colour collector
+
+With the development environment set up and some footage in the  "footage/" folder, (this should be in the top level i.e. tape-detection/footage/testfile.mp4) run `python3 planner.py`.
+
+Make sure you also have the folder "tape-detection/training_data" created. This is where the training data is outputted.
 
 ### Getting the footage
 

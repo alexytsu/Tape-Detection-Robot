@@ -4,4 +4,5 @@ __pycache__
 .vscode/
 footage/
 images/
+training_data/
 *.swp

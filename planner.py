@@ -3,48 +3,10 @@ import os
 import cv2
 import pandas as pd
 import numpy as np
-
 from skimage import color
 
-def choose_file():
-    """
-    Let the user choose the file they wish to work on
-    """
-    
-    # List all the video files we have 
-    video_files = os.listdir("footage")
-    n_files = len(video_files)
-    for idx, video in enumerate(video_files):
-        print(f"[{idx}]: {video}")
+from utility import choose_file, basic_video_metrics
 
-    file_n = input(f"Select the video file (0-{n_files-1}): ")
-    try:
-        file_n = int(file_n)
-        if(file_n >= n_files):
-            print("Invalid file index chosen")
-            exit()
-    except:
-        print("Invalid file selection")
-        exit()
-    
-    filename = video_files[file_n]
-    return filename
-
-def basic_video_metrics(filename):
-    """
-    Get the height, width, fps and length of the footage
-    """
-    filepath = os.path.join("footage", filename)
-    cap = cv2.VideoCapture(filepath)
-    if not cap.isOpened():
-        raise Exception("No footage found: ", filepath)
-
-    length = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    width  = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    fps    = cap.get(cv2.CAP_PROP_FPS)
-
-    return width, height, length, fps
 
 def get_spaced_frames(filename, length, get_n):
     """
@@ -131,13 +93,13 @@ if __name__ == "__main__":
 
     # get some evenly space frames from the video
     gap()
-    get_n = 4
+    get_n = 2
     frames, n_got = get_spaced_frames(filename, l, get_n)
     print(f"Tried to get {get_n} frames and got {n_got}")
 
     # for each frame ask for blue points, yellow points and ground points
     gap()
-    for colour in ["blue", "red", "yellow"]:
+    for colour in ["blue", "red", "yellow", "other"]:
         Classifier = HMI(colour)
         total_data = pd.DataFrame()
 
@@ -162,5 +124,3 @@ if __name__ == "__main__":
         filename = colour + ".csv"
         filepath = os.path.join("training_data", filename)
         total_data.to_csv(filepath)
-
-

@@ -38,6 +38,7 @@ def show_masks(ynew, image):
         col = loc % image.shape[1]
         image[row][col] = (200, 200, 100)
 
+
     roi = np.where(ynew == 4)[0]
     for loc in roi:
         row = int(loc / image.shape[1])
@@ -50,8 +51,37 @@ def show_masks(ynew, image):
     if cv2.waitKey(1) & 0xFF == ord('q'):
         exit()
 
-def test_model(model_name):
+def plan_steering(classified, image):
+    """
+    
+    """
 
+    height = image.shape[0]
+    width = image.shape[1]
+    imagified = np.reshape(classified, (height, width))
+    imagified = imagified / 5
+    print(imagified)
+
+    
+
+    cv2.imshow('res', imagified)
+    cv2.waitKey(0)
+
+
+
+    """
+    locations = np.unravel_index(yellow_loc, (image.shape[0], image.shape[1]))
+    x_avg = int(np.average(locations[0]))
+    y_avg = int(np.average(locations[1]))
+    cv2.circle(image,(y_avg, x_avg), 10, (255, 255, 0))
+    cv2.imshow('res', image)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        exit()
+    print(x_avg, y_avg)
+    """
+
+
+def test_model(model_name):
     # load the model
     model_file_path = os.path.join("trained_models", model_name, "model.sav")
     model_file = open(model_file_path, "rb")
@@ -70,10 +100,8 @@ def test_model(model_name):
         small = frame
         ynew = mask_image(small, model, frame_n)
         if(frame_n % 30 == 0):
-            show_masks(ynew, small)
+            plan_steering(ynew, small)
         frame_n += 1
-
-    
 
 
 if __name__ == "__main__":

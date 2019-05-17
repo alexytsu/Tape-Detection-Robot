@@ -6,3 +6,8 @@ footage/
 images/
 training_data/
 *.swp
+
+build/
+*.o
+*.so
+fr.cpp

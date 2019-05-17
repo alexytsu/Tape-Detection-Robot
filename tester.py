@@ -8,9 +8,13 @@ import numpy as np
 
 from utility import choose_file
 
+DEBUG = True
+
 def mask_image(image, model, frame_n):
 
-    print("Analysing frame", frame_n)
+    if DEBUG:
+        print("Analysing frame", frame_n)
+
     # Convert BGR to HSV
     hsvImage = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     H = hsvImage[:,:,0]
@@ -60,12 +64,10 @@ def plan_steering(classified, image):
     width = image.shape[1]
     imagified = np.reshape(classified, (height, width))
     imagified = imagified / 5
-    print(imagified)
-
-    
-
     cv2.imshow('res', imagified)
-    cv2.waitKey(0)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        exit()
+    
 
 
 
@@ -99,8 +101,7 @@ def test_model(model_name):
 
         small = frame
         ynew = mask_image(small, model, frame_n)
-        if(frame_n % 30 == 0):
-            plan_steering(ynew, small)
+        plan_steering(ynew, small)
         frame_n += 1
 
 

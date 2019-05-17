@@ -7,6 +7,6 @@ namespace frame {
         std::vector<std::vector<double>> arr;
         Frame(std::vector<std::vector<double>> arr);
         ~Frame();
-        int getSize();
+        std::vector<std::pair<int, int>> getSize();
     };
 }

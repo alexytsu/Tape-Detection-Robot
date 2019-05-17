@@ -2,12 +2,13 @@
 #distutils: sources = Frame.cpp
 
 from libcpp.vector cimport vector
+from libcpp.pair cimport pair
 
 cdef extern from "Frame.h" namespace "frame":
     cdef cppclass Frame:
         Frame(vector[vector[double]]) except +
         vector[vector[double]] arr;
-        int getSize()
+        vector[pair[int, int]] getSize()
 
 cdef class PyFrame:
     cdef Frame *thisptr

@@ -7,6 +7,7 @@ import cv2
 import numpy as np
 
 from utility import choose_file
+from fr import PyFrame
 
 DEBUG = True
 
@@ -64,8 +65,19 @@ def plan_steering(classified, image):
     width = image.shape[1]
     imagified = np.reshape(classified, (height, width))
     imagified = imagified / 5
-    cv2.imshow('res', imagified)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
+    cFrame = PyFrame(imagified)
+    pointList = cFrame.getSize()
+
+    for point in pointList:
+        x, y = point
+        try:
+            cv2.line(image, (int((width/2)), height), (x, y), (0,255,0), 2)
+        except:
+            print("failed")
+            pass
+
+    cv2.imshow('res', image)
+    if cv2.waitKey(0) & 0xFF == ord('q'):
         exit()
     
 

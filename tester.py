@@ -57,31 +57,32 @@ def show_masks(ynew, image):
         exit()
 
 def plan_steering(classified, image):
-    """
-    
-    """
-
     height = image.shape[0]
     width = image.shape[1]
     imagified = np.reshape(classified, (height, width))
     imagified = imagified / 5
     cFrame = PyFrame(imagified)
-    pointList = cFrame.getSize()
+    pointList = cFrame.getPoints()
+    lineList = cFrame.getLines()
 
     for point in pointList:
         x, y = point
         try:
-            cv2.line(image, (int((width/2)), height), (x, y), (0,255,0), 2)
+            cv2.circle(image, (x, y), 3, (0,255,0), 2)
         except:
             print("failed")
             pass
 
+    for line in lineList:
+        print(line)
+        end, start = line
+        x1, y1 = end;
+        x2, y2 = start;
+        cv2.line(image, (x1,y1), (x2,y2), (255,0,0), 2)
+
     cv2.imshow('res', image)
     if cv2.waitKey(0) & 0xFF == ord('q'):
         exit()
-    
-
-
 
     """
     locations = np.unravel_index(yellow_loc, (image.shape[0], image.shape[1]))

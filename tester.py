@@ -5,11 +5,13 @@ import pdb
 
 import cv2
 import numpy as np
+from matplotlib import pyplot as plt
 
 from utility import choose_file
 from fr import PyFrame
 
 DEBUG = True
+CAMERA = True
 
 def mask_image(image, model, frame_n):
 
@@ -59,20 +61,58 @@ def show_masks(ynew, image):
 def plan_steering(classified, image):
     height = image.shape[0]
     width = image.shape[1]
-    imagified = np.reshape(classified, (height, width))
-    imagified = imagified / 5
-    cFrame = PyFrame(imagified)
-    pointList = cFrame.getPoints()
-    lineList = cFrame.getLines()
+    """
+    opencv_image = np.array(classified * 50, dtype = np.uint8)
+    opencv_image = np.array([(0,x,0) for x in opencv_image], dtype=np.uint8)
+    opencv_image = np.array(opencv_image, dtype = np.uint8)
+    opencv_image = np.reshape(opencv_image, (height, width, 3))
 
+    gray = cv2.cvtColor(opencv_image,cv2.COLOR_BGR2GRAY)
+    edges = cv2.Canny(gray,50,150,apertureSize = 3)
+    cv2.imshow('canny', edges)
+    if cv2.waitKey(0) & 0xFF == ord('q'):
+        exit()
+
+    minLineLength = 0
+    maxLineGap = 10
+
+
+    lines = cv2.HoughLinesP(edges,1,np.pi/180,100,minLineLength,maxLineGap)
+    for line in lines:
+        for x1,y1,x2,y2 in line:
+            cv2.line(opencv_image,(x1,y1),(x2,y2),(255,0,0),2)
+
+
+
+    cv2.imshow('hough', opencv_image)
+    if cv2.waitKey(0) & 0xFF == ord('q'):
+        exit()
+    """
+
+
+    imagified = np.reshape(classified, (height, width))
+    c_array = imagified / 5
+    cFrame = PyFrame(c_array)
+
+    pointList = cFrame.getTapePoints()
     for point in pointList:
         x, y = point
         try:
-            cv2.circle(image, (x, y), 3, (0,255,0), 2)
+            cv2.circle(image, (x, y), 3, (0,0,255), 1)
         except:
             print("failed")
             pass
 
+    pointList = cFrame.getMidPoints()
+    for point in pointList:
+        x, y = point
+        try:
+            cv2.circle(image, (x, y), 3, (0,255,0), 1)
+        except:
+            print("failed")
+            pass
+
+    lineList = cFrame.getBlueLine()
     for line in lineList:
         print(line)
         end, start = line
@@ -80,20 +120,29 @@ def plan_steering(classified, image):
         x2, y2 = start;
         cv2.line(image, (x1,y1), (x2,y2), (255,0,0), 2)
 
-    cv2.imshow('res', image)
-    if cv2.waitKey(0) & 0xFF == ord('q'):
-        exit()
+    lineList = cFrame.getYellowLine()
+    for line in lineList:
+        print(line)
+        end, start = line
+        x1, y1 = end;
+        x2, y2 = start;
+        cv2.line(image, (x1,y1), (x2,y2), (0,255,255), 2)
 
-    """
-    locations = np.unravel_index(yellow_loc, (image.shape[0], image.shape[1]))
-    x_avg = int(np.average(locations[0]))
-    y_avg = int(np.average(locations[1]))
-    cv2.circle(image,(y_avg, x_avg), 10, (255, 255, 0))
-    cv2.imshow('res', image)
-    if cv2.waitKey(1) & 0xFF == ord('q'):
-        exit()
-    print(x_avg, y_avg)
-    """
+    lineList = cFrame.getNavLine()
+    for line in lineList:
+        print(line)
+        end, start = line
+        x1, y1 = end;
+        x2, y2 = start;
+        cv2.line(image, (x1,y1), (x2,y2), (0,255,0), 2)
+
+    cv2.imshow('res', cv2.resize(image, (1280, 720)))
+    if(CAMERA):
+        cv2.waitKey(1)
+    else:
+        if cv2.waitKey(0) & 0xFF == ord('q'):
+            exit()
+
 
 
 def test_model(model_name):
@@ -103,8 +152,12 @@ def test_model(model_name):
     model = pickle.load(model_file)
 
     # load the video file
-    video_file_path = os.path.join("footage", choose_file())
-    video = cv2.VideoCapture(video_file_path)
+    if CAMERA:
+        video = cv2.VideoCapture(4)
+    else:
+        video_file_path = os.path.join("footage", choose_file())
+        video = cv2.VideoCapture(video_file_path)
+
     frame_n = 0
     while video.isOpened():
         ret, frame = video.read()
@@ -112,7 +165,7 @@ def test_model(model_name):
             print("Video finished")
             break
 
-        small = frame
+        small = cv2.resize(frame, (256, 144))
         ynew = mask_image(small, model, frame_n)
         plan_steering(ynew, small)
         frame_n += 1

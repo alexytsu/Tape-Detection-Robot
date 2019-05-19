@@ -1,15 +1,22 @@
 #include <vector>
 #include <iostream>
 
+using namespace std;
+
 namespace frame {
     class Frame {
     public:
-        std::vector<std::vector<double>> arr;
-        std::vector<std::pair<int, int>> darkvec;
-        std::vector<std::pair<int, int>> lightvec;
-        Frame(std::vector<std::vector<double>> arr);
+        vector<vector<double>> arr;
+        vector<pair<int, int>> darkvec;
+        vector<pair<int, int>> lightvec;
+        vector<pair<int, int>> midpoints;
+        Frame(vector<vector<double>> arr);
         ~Frame();
-        std::vector<std::pair<int, int>> getPoints();
-        std::vector<std::pair<std::pair<int, int>, std::pair<int, int>>> getLines();
+        vector<pair<int, int>> getTapePoints();
+        vector<pair<int, int>> getMidPoints();
+        vector<pair<pair<int, int>, pair<int, int>>> getNavLine();
+        vector<pair<pair<int, int>, pair<int, int>>> getYellowLine();
+        vector<pair<pair<int, int>, pair<int, int>>> getBlueLine();
     };
+
 }

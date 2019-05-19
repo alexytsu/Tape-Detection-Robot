@@ -93,7 +93,7 @@ if __name__ == "__main__":
 
     # get some evenly space frames from the video
     gap()
-    get_n = 2
+    get_n = 3
     frames, n_got = get_spaced_frames(filename, l, get_n)
     print(f"Tried to get {get_n} frames and got {n_got}")
 

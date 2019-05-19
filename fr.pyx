@@ -10,8 +10,11 @@ cdef extern from "Frame.h" namespace "frame":
         vector[vector[double]] arr;
         vector[pair[int, int]] lightvec
         vector[pair[int, int]] darkvec
-        vector[pair[int, int]] getPoints()
-        vector[pair[pair[int, int], pair[int, int]]] getLines()
+        vector[pair[int, int]] getMidPoints()
+        vector[pair[int, int]] getTapePoints()
+        vector[pair[pair[int, int], pair[int, int]]] getBlueLine()
+        vector[pair[pair[int, int], pair[int, int]]] getYellowLine()
+        vector[pair[pair[int, int], pair[int, int]]] getNavLine()
 
 cdef class PyFrame:
     cdef Frame *thisptr
@@ -21,8 +24,17 @@ cdef class PyFrame:
     def __dealloc__(self):
         del self.thisptr
     
-    def getPoints(self):
-        return self.thisptr.getPoints()
+    def getMidPoints(self):
+        return self.thisptr.getMidPoints()
 
-    def getLines(self):
-        return self.thisptr.getLines()
+    def getTapePoints(self):
+        return self.thisptr.getTapePoints()
+
+    def getBlueLine(self):
+        return self.thisptr.getBlueLine()
+
+    def getYellowLine(self):
+        return self.thisptr.getYellowLine()
+
+    def getNavLine(self):
+        return self.thisptr.getNavLine()

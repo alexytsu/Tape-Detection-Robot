@@ -17,7 +17,7 @@ vector<pair<int, int>> Frame::getPoints()
 {
     vector<pair<int, int>> darkvec;
     vector<pair<int, int>> lightvec;
-    for (uint32_t i = 0; i < arr.size(); i++)
+    for (uint32_t i = arr.size()/2; i < arr.size(); i++)
     {
 
         int dark_j = 0;
@@ -75,11 +75,14 @@ vector<pair<pair<int, int>, pair<int, int>>> Frame::getLines()
         xysum += darkvec[i].first * darkvec[i].second;
     }
 
+    double avg_slope;
+    double avg_intercept;
+
     double slope = (n*xysum-xsum*ysum)/(n*x2sum-xsum*xsum);            //calculate slope
     double intercept = (x2sum*ysum-xsum*xysum)/(x2sum*n-xsum*xsum); 
 
-    cout << "x2: " << x2sum << " xsum: " << xsum << " ysum: " << ysum << " xysum: " << xysum << endl;
-    cout << "m: " << slope << " b: " << intercept << endl;
+    avg_slope = slope;
+    avg_intercept = intercept;
 
     // (y-b)/m
     int basex, basey, endx, endy;
@@ -93,6 +96,52 @@ vector<pair<pair<int, int>, pair<int, int>>> Frame::getLines()
     pair<int, int> end = make_pair(endx, endy);
     pair<pair<int, int>, pair<int, int>> line = make_pair(base, end);
     lines.push_back(line);
+
+
+    n = lightvec.size();
+    xsum = 0;
+    ysum = 0;
+    x2sum = 0;
+    xysum = 0;
+    for (uint32_t i = 0; i < n; i++)
+    {
+        xsum += lightvec[i].first;
+        ysum += lightvec[i].second;
+        x2sum += pow(lightvec[i].first, 2);
+        xysum += lightvec[i].first * lightvec[i].second;
+    }
+
+    slope = (n*xysum-xsum*ysum)/(n*x2sum-xsum*xsum);            //calculate slope
+    intercept = (x2sum*ysum-xsum*xysum)/(x2sum*n-xsum*xsum); 
+
+    avg_slope += slope;
+    avg_intercept += intercept;
+    avg_slope = avg_slope / 2;
+    avg_intercept = avg_intercept / 2;
+
+    basey = 0;
+    basex =  (int)(basey-intercept)/slope;
+
+    endy = arr.size();
+    endx = (int)(endy-intercept)/slope;
+
+    base = make_pair(basex, basey);
+    end = make_pair(endx, endy);
+    line = make_pair(base, end);
+    lines.push_back(line);
+
+    basey = 0;
+    basex =  (int)(basey-avg_intercept)/avg_slope;
+
+    endy = arr.size();
+    endx = (int)(endy-avg_intercept)/avg_slope;
+
+    base = make_pair(basex, basey);
+    end = make_pair(endx, endy);
+    line = make_pair(base, end);
+    lines.push_back(line);
+
+
 
     return lines;
 }

@@ -11,9 +11,11 @@ from matplotlib import pyplot as plt
 
 from utility import choose_file
 from fr import PyFrame
+from arduino import getSerialPort, SendSpeed
 
 DEBUG = True
 CAMERA = True
+SER = None
 
 def mask_image(image, model, frame_n):
 
@@ -143,6 +145,7 @@ def plan_steering(classified, image):
         print(navLine)
         lat, angle, steer = getLineAttributes(navLine)
         writeLineAttributes(lat, angle, steer, image)
+        return angle
     elif blueLine and yellowLine:
         print("blue + yellow")
         lat1, angle1, steer1 = getLineAttributes(blueLine)
@@ -151,17 +154,17 @@ def plan_steering(classified, image):
         angle = (angle1 + angle2) / 2
         steer = (steer1 + steer2) / 2
         writeLineAttributes(lat, angle, steer, image)
+        return angle
     elif blueLine:
         print("blue")
         lat, angle, steer = getLineAttributes(blueLine)
         writeLineAttributes(lat, angle, steer, image)
+        return angle
     elif yellowLine:
         print("yellow")
         lat, angle, steer = getLineAttributes(yellowLine)
         writeLineAttributes(lat, angle, steer, image)
-    
-
-        
+        return angle
 
     cv2.imshow('res', cv2.resize(image, (1280, 720)))
     if(CAMERA):
@@ -170,6 +173,14 @@ def plan_steering(classified, image):
         if cv2.waitKey(0) & 0xFF == ord('q'):
             exit()
 
+
+def applyIPT(image):
+    pts_src = np.array([[174, 377],[301, 44],[545, 51],[659,379]])
+    pts_dst = np.array([[174, 377],[174, 0],[659, 0],[659,379]])
+    h, status = cv2.findHomography(pts_src, pts_dst)
+    im_out  = cv2.warpPerspective(image, h, (image.shape[1],image.shape[0]))
+
+    return im_out
 
 
 def test_model(model_name):
@@ -192,9 +203,13 @@ def test_model(model_name):
             print("Video finished")
             break
 
+        #frame = applyIPT(frame)
+
         small = cv2.resize(frame, (256, 144))
         ynew = mask_image(small, model, frame_n)
-        plan_steering(ynew, small)
+        angle = plan_steering(ynew, small)
+        SendSpeed(SER, angle, 90)
+
         frame_n += 1
 
 
@@ -205,4 +220,5 @@ if __name__ == "__main__":
     else:
         if sys.argv[1] == '--test':
             CAMERA = False
+    SER = getSerialPort()
     test_model("Adaboost")

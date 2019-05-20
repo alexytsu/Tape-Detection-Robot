@@ -193,7 +193,7 @@ def test_model(model_name):
 
     # load the video file
     if CAMERA:
-        video = cv2.VideoCapture(4)
+        video = cv2.VideoCapture(0)
     else:
         video_file_path = os.path.join("footage", choose_file())
         video = cv2.VideoCapture(video_file_path)
@@ -210,7 +210,8 @@ def test_model(model_name):
         small = cv2.resize(frame, (256, 144))
         ynew = mask_image(small, model, frame_n)
         angle = plan_steering(ynew, small)
-        SendSpeed(SER, int(angle), 90)
+        if SER:
+            SendSpeed(SER, int(angle), 90)
 
         frame_n += 1
 
@@ -222,5 +223,8 @@ if __name__ == "__main__":
     else:
         if sys.argv[1] == '--test':
             CAMERA = False
-    SER = getSerialPort()
+    try:
+        SER = getSerialPort()
+    except:
+        SER = None
     test_model("Adaboost")

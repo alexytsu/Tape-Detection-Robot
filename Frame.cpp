@@ -29,12 +29,12 @@ vector<pair<int, int>> Frame::getTapePoints()
         uint32_t width = arr[0].size();
         for (uint32_t j = 0; j < width; j++)
         {
-            if (arr[i][j] == 0.2 && j < width/2)
+            if (arr[i][j] == 0.2 && j < width / 2)
             {
                 n_dark++;
                 dark_j += j;
             }
-            if (arr[i][j] == 0.6 && j > width/2)
+            if (arr[i][j] == 0.6 && j > width / 2)
             {
                 n_light++;
                 light_j += j;
@@ -79,7 +79,6 @@ vector<pair<pair<int, int>, pair<int, int>>> Frame::getBlueLine()
     // PLOT POINTS FOR DARK VEC
     double xsum = 0, ysum = 0, x2sum = 0, xysum = 0;
     uint32_t n = darkvec.size();
-    cout << "n: " << n << endl;
     for (uint32_t i = 0; i < n; i++)
     {
         xsum += darkvec[i].first;
@@ -88,17 +87,16 @@ vector<pair<pair<int, int>, pair<int, int>>> Frame::getBlueLine()
         xysum += darkvec[i].first * darkvec[i].second;
     }
 
-
     double slope = (n * xysum - xsum * ysum) / (n * x2sum - xsum * xsum); //calculate slope
     double intercept = (x2sum * ysum - xsum * xysum) / (x2sum * n - xsum * xsum);
 
     // (y-b)/m
     int basex, basey, endx, endy;
     basey = 0;
-    basex = (int)(basey - intercept) / slope;
+    basex = (int)((basey - intercept) / slope);
 
     endy = arr.size();
-    endx = (int)(endy - intercept) / slope;
+    endx = (int)((endy - intercept) / slope);
 
     pair<int, int> base = make_pair(basex, basey);
     pair<int, int> end = make_pair(endx, endy);
@@ -114,7 +112,6 @@ vector<pair<pair<int, int>, pair<int, int>>> Frame::getYellowLine()
     // PLOT POINTS FOR DARK VEC
     double xsum = 0, ysum = 0, x2sum = 0, xysum = 0;
     uint32_t n = lightvec.size();
-    cout << "n: " << n << endl;
     for (uint32_t i = 0; i < n; i++)
     {
         xsum += lightvec[i].first;
@@ -123,17 +120,16 @@ vector<pair<pair<int, int>, pair<int, int>>> Frame::getYellowLine()
         xysum += lightvec[i].first * lightvec[i].second;
     }
 
-
     double slope = (n * xysum - xsum * ysum) / (n * x2sum - xsum * xsum); //calculate slope
     double intercept = (x2sum * ysum - xsum * xysum) / (x2sum * n - xsum * xsum);
 
     // (y-b)/m
     int basex, basey, endx, endy;
     basey = 0;
-    basex = (int)(basey - intercept) / slope;
+    basex = (int)((basey - intercept) / slope);
 
     endy = arr.size();
-    endx = (int)(endy - intercept) / slope;
+    endx = (int)((endy - intercept) / slope);
 
     pair<int, int> base = make_pair(basex, basey);
     pair<int, int> end = make_pair(endx, endy);
@@ -149,7 +145,6 @@ vector<pair<pair<int, int>, pair<int, int>>> Frame::getNavLine()
     // PLOT POINTS FOR DARK VEC
     double xsum = 0, ysum = 0, x2sum = 0, xysum = 0;
     uint32_t n = midpoints.size();
-    cout << "n: " << n << endl;
     for (uint32_t i = 0; i < n; i++)
     {
         xsum += midpoints[i].first;
@@ -158,17 +153,16 @@ vector<pair<pair<int, int>, pair<int, int>>> Frame::getNavLine()
         xysum += midpoints[i].first * midpoints[i].second;
     }
 
-
     double slope = (n * xysum - xsum * ysum) / (n * x2sum - xsum * xsum); //calculate slope
     double intercept = (x2sum * ysum - xsum * xysum) / (x2sum * n - xsum * xsum);
 
     // (y-b)/m
     int basex, basey, endx, endy;
     basey = 0;
-    basex = (int)(basey - intercept) / slope;
+    basex = (int)((basey - intercept) / slope);
 
     endy = arr.size();
-    endx = (int)(endy - intercept) / slope;
+    endx = (int)((endy - intercept) / slope);
 
     pair<int, int> base = make_pair(basex, basey);
     pair<int, int> end = make_pair(endx, endy);

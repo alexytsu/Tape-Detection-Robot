@@ -3,6 +3,7 @@ import pickle
 import argparse
 import pdb
 import sys
+import math
 
 import cv2
 import numpy as np
@@ -62,34 +63,6 @@ def show_masks(ynew, image):
 def plan_steering(classified, image):
     height = image.shape[0]
     width = image.shape[1]
-    """
-    opencv_image = np.array(classified * 50, dtype = np.uint8)
-    opencv_image = np.array([(0,x,0) for x in opencv_image], dtype=np.uint8)
-    opencv_image = np.array(opencv_image, dtype = np.uint8)
-    opencv_image = np.reshape(opencv_image, (height, width, 3))
-
-    gray = cv2.cvtColor(opencv_image,cv2.COLOR_BGR2GRAY)
-    edges = cv2.Canny(gray,50,150,apertureSize = 3)
-    cv2.imshow('canny', edges)
-    if cv2.waitKey(0) & 0xFF == ord('q'):
-        exit()
-
-    minLineLength = 0
-    maxLineGap = 10
-
-
-    lines = cv2.HoughLinesP(edges,1,np.pi/180,100,minLineLength,maxLineGap)
-    for line in lines:
-        for x1,y1,x2,y2 in line:
-            cv2.line(opencv_image,(x1,y1),(x2,y2),(255,0,0),2)
-
-
-
-    cv2.imshow('hough', opencv_image)
-    if cv2.waitKey(0) & 0xFF == ord('q'):
-        exit()
-    """
-
 
     imagified = np.reshape(classified, (height, width))
     c_array = imagified / 5
@@ -104,38 +77,90 @@ def plan_steering(classified, image):
             print("failed")
             pass
 
+    lateral_error = 0
     pointList = cFrame.getMidPoints()
     for point in pointList:
         x, y = point
         try:
             cv2.circle(image, (x, y), 3, (0,255,0), 1)
+            lateral_error += x - width/2 
         except:
             print("failed")
             pass
+    try:    
+        lateral_error = lateral_error/len(pointList)
+    except:
+        pass
+
+    blueLine = None
+    yellowLine = None
+    navLine = None
 
     lineList = cFrame.getBlueLine()
     for line in lineList:
-        print(line)
         end, start = line
         x1, y1 = end;
         x2, y2 = start;
-        cv2.line(image, (x1,y1), (x2,y2), (255,0,0), 2)
+        cv2.line(image, (x1,y1), (x2,y2), (255,0,0), 1)
+        blueLine = line
 
     lineList = cFrame.getYellowLine()
     for line in lineList:
-        print(line)
         end, start = line
         x1, y1 = end;
         x2, y2 = start;
-        cv2.line(image, (x1,y1), (x2,y2), (0,255,255), 2)
+        cv2.line(image, (x1,y1), (x2,y2), (0,255,255), 1)
+        yellowLine = line
 
     lineList = cFrame.getNavLine()
     for line in lineList:
-        print(line)
         end, start = line
-        x1, y1 = end;
-        x2, y2 = start;
+        x1, y1 = start;
+        x2, y2 = end;
         cv2.line(image, (x1,y1), (x2,y2), (0,255,0), 2)
+        navLine = line
+
+    def getLineAttributes(line):
+        end, start = line
+        x1, y1 = start;
+        x2, y2 = end;
+        angle_hor = x2 - x1
+        angle_ver = y1 - y2
+        angle_error = math.degrees(math.atan2(angle_hor, angle_ver))
+        I = 0.5
+        P = 0.2
+        steering_angle = I * lateral_error + P * angle_error
+        return lateral_error, angle_error, steering_angle
+    
+    def writeLineAttributes(lat, angle, steer, image):
+        cv2.putText(image, f'Lateral Error: {lat:.2f}', (10, 15), cv2.FONT_HERSHEY_PLAIN, 1, (255,255,0), 1, cv2.LINE_AA)
+        cv2.putText(image, f'Angular Error: {angle:.2f}', (10, 30), cv2.FONT_HERSHEY_PLAIN, 1, (255,255,0), 1, cv2.LINE_AA)
+        cv2.putText(image, f'Steering Angle: {steer:.2f}', (10, 45), cv2.FONT_HERSHEY_PLAIN, 1, (255,255,0), 1, cv2.LINE_AA)
+
+
+    if navLine:
+        print("nav")
+        lat, angle, steer = getLineAttributes(navLine)
+        writeLineAttributes(lat, angle, steer, image)
+    elif blueLine and yellowLine:
+        print("blue + yellow")
+        lat1, angle1, steer1 = getLineAttributes(blueLine)
+        lat2, angle2, steer2 = getLineAttributes(yellowLine)
+        lat = (lat1 + lat2) / 2
+        angle = (angle1 + angle2) / 2
+        steer = (steer1 + steer2) / 2
+        writeLineAttributes(lat, angle, steer, image)
+    elif blueLine:
+        print("blue")
+        lat, angle, steer = getLineAttributes(blueLine)
+        writeLineAttributes(lat, angle, steer, image)
+    elif yellowLine:
+        print("yellow")
+        lat, angle, steer = getLineAttributes(yellowLine)
+        writeLineAttributes(lat, angle, steer, image)
+    
+
+        
 
     cv2.imshow('res', cv2.resize(image, (1280, 720)))
     if(CAMERA):

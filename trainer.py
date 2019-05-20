@@ -50,8 +50,6 @@ def train_classifier(data_folder):
     #classifier = GaussianProcessClassifier(1.0 * RBF(1.0))
     model = classifier.fit(X,y)
 
-
-
     filepath = os.path.join("trained_models", "Adaboost", "model.sav")
     pickle.dump(model, open(filepath,'wb'))
 

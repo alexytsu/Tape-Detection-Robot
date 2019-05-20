@@ -79,6 +79,9 @@ vector<pair<pair<int, int>, pair<int, int>>> Frame::getBlueLine()
     // PLOT POINTS FOR DARK VEC
     double xsum = 0, ysum = 0, x2sum = 0, xysum = 0;
     uint32_t n = darkvec.size();
+    if (n <= 1){
+        return lines;
+    }
     for (uint32_t i = 0; i < n; i++)
     {
         xsum += darkvec[i].first;
@@ -112,6 +115,9 @@ vector<pair<pair<int, int>, pair<int, int>>> Frame::getYellowLine()
     // PLOT POINTS FOR DARK VEC
     double xsum = 0, ysum = 0, x2sum = 0, xysum = 0;
     uint32_t n = lightvec.size();
+    if (n <= 1){
+        return lines;
+    }
     for (uint32_t i = 0; i < n; i++)
     {
         xsum += lightvec[i].first;
@@ -145,6 +151,9 @@ vector<pair<pair<int, int>, pair<int, int>>> Frame::getNavLine()
     // PLOT POINTS FOR DARK VEC
     double xsum = 0, ysum = 0, x2sum = 0, xysum = 0;
     uint32_t n = midpoints.size();
+    if (n <= 1){
+        return lines;
+    }
     for (uint32_t i = 0; i < n; i++)
     {
         xsum += midpoints[i].first;

@@ -138,8 +138,9 @@ def plan_steering(classified, image):
         cv2.putText(image, f'Steering Angle: {steer:.2f}', (10, 45), cv2.FONT_HERSHEY_PLAIN, 1, (255,255,0), 1, cv2.LINE_AA)
 
 
-    if navLine:
+    if navLine is not None:
         print("nav")
+        print(navLine)
         lat, angle, steer = getLineAttributes(navLine)
         writeLineAttributes(lat, angle, steer, image)
     elif blueLine and yellowLine:

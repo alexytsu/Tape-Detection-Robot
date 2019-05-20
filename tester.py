@@ -2,6 +2,7 @@ import os
 import pickle
 import argparse
 import pdb
+import sys
 
 import cv2
 import numpy as np
@@ -172,4 +173,10 @@ def test_model(model_name):
 
 
 if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Running with CAMERA mode on by default")
+        print("Use 'python tester.py --test' to use a saved video")
+    else:
+        if sys.argv[1] == '--test':
+            CAMERA = False
     test_model("Adaboost")

@@ -139,13 +139,14 @@ def plan_steering(classified, image):
         cv2.putText(image, f'Angular Error: {angle:.2f}', (10, 30), cv2.FONT_HERSHEY_PLAIN, 1, (255,255,0), 1, cv2.LINE_AA)
         cv2.putText(image, f'Steering Angle: {steer:.2f}', (10, 45), cv2.FONT_HERSHEY_PLAIN, 1, (255,255,0), 1, cv2.LINE_AA)
 
+    retval = 0
 
     if navLine is not None:
         print("nav")
         print(navLine)
         lat, angle, steer = getLineAttributes(navLine)
         writeLineAttributes(lat, angle, steer, image)
-        return angle
+        retval = angle
     elif blueLine and yellowLine:
         print("blue + yellow")
         lat1, angle1, steer1 = getLineAttributes(blueLine)
@@ -154,17 +155,17 @@ def plan_steering(classified, image):
         angle = (angle1 + angle2) / 2
         steer = (steer1 + steer2) / 2
         writeLineAttributes(lat, angle, steer, image)
-        return angle
+        retval = angle
     elif blueLine:
         print("blue")
         lat, angle, steer = getLineAttributes(blueLine)
         writeLineAttributes(lat, angle, steer, image)
-        return angle
+        retval = angle
     elif yellowLine:
         print("yellow")
         lat, angle, steer = getLineAttributes(yellowLine)
         writeLineAttributes(lat, angle, steer, image)
-        return angle
+        retval = angle
 
     cv2.imshow('res', cv2.resize(image, (1280, 720)))
     if(CAMERA):
@@ -172,6 +173,7 @@ def plan_steering(classified, image):
     else:
         if cv2.waitKey(0) & 0xFF == ord('q'):
             exit()
+    return retval
 
 
 def applyIPT(image):
@@ -208,7 +210,7 @@ def test_model(model_name):
         small = cv2.resize(frame, (256, 144))
         ynew = mask_image(small, model, frame_n)
         angle = plan_steering(ynew, small)
-        SendSpeed(SER, angle, 90)
+        SendSpeed(SER, int(angle), 90)
 
         frame_n += 1
 

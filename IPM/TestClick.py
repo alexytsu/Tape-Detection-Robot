@@ -21,8 +21,8 @@ camera = input("input camera: ")
 cam = cv2.VideoCapture(int(camera))
 print("[0] re-tune matrix \n[1] reload old matrix")
 
-val = input()
-if(val == 1):
+val = int(input())
+if(val == 0):
 	cv2.namedWindow('image')
 	cv2.setMouseCallback('image',readmouse)
 	while(counter < 4):

@@ -140,8 +140,8 @@ def plan_steering(classified, image):
         angle_hor = x2 - x1
         angle_ver = y1 - y2
         angle_error = math.degrees(math.atan2(angle_hor, angle_ver))
-        I = 0.1
-        P = 0.2
+        I = 0.3
+        P = 0.4
         steering_angle = I * lateral_error + P * angle_error
         return lateral_error, angle_error, steering_angle
 
@@ -183,7 +183,7 @@ def plan_steering(classified, image):
         print("nav")
         lat, angle, steer = getLineAttributes(navLine)
         writeLineAttributes(lat, angle, steer, image)
-        retval = steer * 2
+        retval = steer
     elif blueLine and yellowLine:
         print("blue + yellow")
         lat1, angle1, steer1 = getLineAttributes(blueLine)
@@ -192,24 +192,26 @@ def plan_steering(classified, image):
         angle = (angle1 + angle2) / 2
         steer = (steer1 + steer2) / 2
         writeLineAttributes(lat, angle, steer, image)
-        retval = steer * 2
+        retval = steer
     elif blueLine:
         print("blue")
         lat, angle, steer = getLineAttributes(blueLine)
         writeLineAttributes(lat, angle, steer, image)
-        retval = steer * 2.5
+        retval = 2 * steer
     elif yellowLine:
         print("yellow")
         lat, angle, steer = getLineAttributes(yellowLine)
         writeLineAttributes(lat, angle, steer, image)
-        retval = steer * 2.5
+        retval = 2 * steer
 
+    """
     cv2.imshow("res", cv2.resize(image, (1280, 720)))
     if CAMERA:
         cv2.waitKey(1)
     else:
         if cv2.waitKey(0) & 0xFF == ord("q"):
             exit()
+    """
 
     return retval
 
@@ -241,7 +243,7 @@ def test_model(model_name):
             print("Video finished")
             break
     
-        # frame = applyIPT(frame)
+        frame = applyIPT(frame)
 
         small = cv2.resize(frame, (256, 144))
         ynew = mask_image(small, model, frame_n)
@@ -265,7 +267,7 @@ if __name__ == "__main__":
         SER = None
 
     try:
-        ipm_file = open('./IPM/homographyMatrix.p', 'rb')
+        ipm_file = open('./IPM/homographyMatrix.p_', 'rb')
         MAPPING = pickle.load(ipm_file)
     except:
         MAPPING = None

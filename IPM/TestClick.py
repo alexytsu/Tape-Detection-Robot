@@ -21,8 +21,8 @@ camera = input("input camera: ")
 cam = cv2.VideoCapture(int(camera))
 print("[0] re-tune matrix \n[1] reload old matrix")
 
-val = input()
-if(val == 1):
+val = int(input())
+if(val == 0):
 	cv2.namedWindow('image')
 	cv2.setMouseCallback('image',readmouse)
 	while(counter < 4):
@@ -34,7 +34,7 @@ if(val == 1):
 	print(pts_src);
 	x1 = pts_src[1][0] 
 	x2 = pts_src[2][0] 
-	y1 = 0#pts_src[0][1] 
+	y1 = pts_src[0][1] 
 	y2 = pts_src[2][1]
 	pts_dst = np.array([[x1, y1],[x1, y2],[x2, y2],[x2,y1]])
 	cv2.destroyAllWindows()

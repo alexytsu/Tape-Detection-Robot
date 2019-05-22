@@ -12,6 +12,8 @@ cdef extern from "Frame.h" namespace "frame":
         vector[pair[int, int]] darkvec
         vector[pair[int, int]] getMidPoints()
         vector[pair[int, int]] getTapePoints()
+        vector[pair[int, int]] getDarkPoints()
+        vector[pair[int, int]] getLightPoints()
         vector[pair[pair[int, int], pair[int, int]]] getBlueLine()
         vector[pair[pair[int, int], pair[int, int]]] getYellowLine()
         vector[pair[pair[int, int], pair[int, int]]] getNavLine()
@@ -35,6 +37,12 @@ cdef class PyFrame:
 
     def getYellowLine(self):
         return self.thisptr.getYellowLine()
+
+    def getDarkPoints(self):
+        return self.thisptr.getDarkPoints()
+
+    def getLightPoints(self):
+        return self.thisptr.getLightPoints()
 
     def getNavLine(self):
         return self.thisptr.getNavLine()

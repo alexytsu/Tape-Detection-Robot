@@ -11,6 +11,7 @@ from sklearn.ensemble import AdaBoostClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.gaussian_process.kernels import RBF
+from sklearn.neighbors import KNeighborsClassifier
 
 def train_classifier(data_folder):
 
@@ -47,10 +48,11 @@ def train_classifier(data_folder):
     # plt.scatter()
     # classifier = AdaBoostClassifier(n_estimators=3, learning_rate=1) 
     classifier = GaussianNB()
-    #classifier = GaussianProcessClassifier(1.0 * RBF(1.0))
+    # classifier = GaussianProcessClassifier(1.0 * RBF(1.0))
+    # classifier = KNeighborsClassifier(3)
     model = classifier.fit(X,y)
 
-    filepath = os.path.join("trained_models", "Adaboost", "model.sav")
+    filepath = os.path.join("trained_models", "Gaussian", "model.sav")
     pickle.dump(model, open(filepath,'wb'))
 
 if __name__ == "__main__":

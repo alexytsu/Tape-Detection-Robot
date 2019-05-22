@@ -17,7 +17,7 @@ vector<pair<int, int>> Frame::getTapePoints()
 {
     vector<pair<int, int>> darkvec;
     vector<pair<int, int>> lightvec;
-    for (uint32_t i = arr.size() / 2; i < arr.size(); i++)
+    for (uint32_t i = arr.size() / 3; i < arr.size(); i++)
     {
 
         int dark_j = 0;
@@ -62,14 +62,22 @@ vector<pair<int, int>> Frame::getTapePoints()
     this->darkvec = darkvec;
     this->midpoints = midpoints;
 
-    lightvec.insert(lightvec.end(), darkvec.begin(), darkvec.end());
-
     return lightvec;
 }
 
 vector<pair<int, int>> Frame::getMidPoints()
 {
     return midpoints;
+}
+
+vector<pair<int, int>> Frame::getLightPoints()
+{
+    return lightvec;
+}
+
+vector<pair<int, int>> Frame::getDarkPoints()
+{
+    return darkvec;
 }
 
 vector<pair<pair<int, int>, pair<int, int>>> Frame::getBlueLine()

@@ -71,28 +71,37 @@ def plan_steering(classified, image):
     cFrame = PyFrame(c_array)
 
     pointList = cFrame.getTapePoints()
-    for point in pointList:
-        x, y = point
-        try:
-            cv2.circle(image, (x, y), 3, (0,0,255), 1)
-        except:
-            print("failed")
-            pass
 
     lateral_error = 0
     pointList = cFrame.getMidPoints()
     for point in pointList:
-        x, y = point
         try:
-            cv2.circle(image, (x, y), 3, (0,255,0), 1)
+            x, y = point
             lateral_error += x - width/2 
+            cv2.circle(image, (x, y), 2, (0, 100, 0), 1)
         except:
-            print("failed")
             pass
-    try:    
+
+    try:
         lateral_error = lateral_error/len(pointList)
     except:
-        pass
+        print("No Points")
+
+    pointList = cFrame.getDarkPoints()
+    for point in pointList:
+        x, y = point
+        try:
+            cv2.circle(image, (x,y), 2, (255,100,100), 1)
+        except:
+            print("Failed")
+
+    pointList = cFrame.getLightPoints()
+    for point in pointList:
+        x, y = point
+        try:
+            cv2.circle(image, (x,y), 2, (0,100,100), 1)
+        except:
+            print("Failed")
 
     blueLine = None
     yellowLine = None
@@ -193,7 +202,7 @@ def test_model(model_name):
 
     # load the video file
     if CAMERA:
-        video = cv2.VideoCapture(0)
+        video = cv2.VideoCapture(1)
     else:
         video_file_path = os.path.join("footage", choose_file())
         video = cv2.VideoCapture(video_file_path)
@@ -205,7 +214,7 @@ def test_model(model_name):
             print("Video finished")
             break
 
-        #frame = applyIPT(frame)
+        frame = applyIPT(frame)
 
         small = cv2.resize(frame, (256, 144))
         ynew = mask_image(small, model, frame_n)
@@ -227,4 +236,5 @@ if __name__ == "__main__":
         SER = getSerialPort()
     except:
         SER = None
-    test_model("Adaboost")
+    test_model("Gaussian")
+

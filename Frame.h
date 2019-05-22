@@ -14,6 +14,8 @@ namespace frame {
         ~Frame();
         vector<pair<int, int>> getTapePoints();
         vector<pair<int, int>> getMidPoints();
+        vector<pair<int, int>> getLightPoints();
+        vector<pair<int, int>> getDarkPoints();
         vector<pair<pair<int, int>, pair<int, int>>> getNavLine();
         vector<pair<pair<int, int>, pair<int, int>>> getYellowLine();
         vector<pair<pair<int, int>, pair<int, int>>> getBlueLine();

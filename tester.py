@@ -180,10 +180,9 @@ def plan_steering(classified, image):
 
     if navLine is not None:
         print("nav")
-        print(navLine)
         lat, angle, steer = getLineAttributes(navLine)
         writeLineAttributes(lat, angle, steer, image)
-        retval = angle
+        retval = steer
     elif blueLine and yellowLine:
         print("blue + yellow")
         lat1, angle1, steer1 = getLineAttributes(blueLine)
@@ -192,17 +191,17 @@ def plan_steering(classified, image):
         angle = (angle1 + angle2) / 2
         steer = (steer1 + steer2) / 2
         writeLineAttributes(lat, angle, steer, image)
-        retval = angle
+        retval = steer
     elif blueLine:
         print("blue")
         lat, angle, steer = getLineAttributes(blueLine)
         writeLineAttributes(lat, angle, steer, image)
-        retval = angle
+        retval = steer
     elif yellowLine:
         print("yellow")
         lat, angle, steer = getLineAttributes(yellowLine)
         writeLineAttributes(lat, angle, steer, image)
-        retval = angle
+        retval = steer
 
     cv2.imshow("res", cv2.resize(image, (1280, 720)))
     if CAMERA:
@@ -210,6 +209,7 @@ def plan_steering(classified, image):
     else:
         if cv2.waitKey(0) & 0xFF == ord("q"):
             exit()
+
     return retval
 
 
@@ -242,7 +242,7 @@ def test_model(model_name):
             print("Video finished")
             break
 
-        frame = applyIPT(frame)
+        # frame = applyIPT(frame)
 
         small = cv2.resize(frame, (256, 144))
         ynew = mask_image(small, model, frame_n)

@@ -16,6 +16,7 @@ from arduino import getSerialPort, SendSpeed
 DEBUG = True
 CAMERA = True
 SER = None
+MAPPING = None
 
 
 def mask_image(image, model, frame_n):
@@ -139,7 +140,7 @@ def plan_steering(classified, image):
         angle_hor = x2 - x1
         angle_ver = y1 - y2
         angle_error = math.degrees(math.atan2(angle_hor, angle_ver))
-        I = 0.5
+        I = 0.1
         P = 0.2
         steering_angle = I * lateral_error + P * angle_error
         return lateral_error, angle_error, steering_angle
@@ -182,7 +183,7 @@ def plan_steering(classified, image):
         print("nav")
         lat, angle, steer = getLineAttributes(navLine)
         writeLineAttributes(lat, angle, steer, image)
-        retval = steer
+        retval = steer * 2
     elif blueLine and yellowLine:
         print("blue + yellow")
         lat1, angle1, steer1 = getLineAttributes(blueLine)
@@ -191,17 +192,17 @@ def plan_steering(classified, image):
         angle = (angle1 + angle2) / 2
         steer = (steer1 + steer2) / 2
         writeLineAttributes(lat, angle, steer, image)
-        retval = steer
+        retval = steer * 2
     elif blueLine:
         print("blue")
         lat, angle, steer = getLineAttributes(blueLine)
         writeLineAttributes(lat, angle, steer, image)
-        retval = steer
+        retval = steer * 2.5
     elif yellowLine:
         print("yellow")
         lat, angle, steer = getLineAttributes(yellowLine)
         writeLineAttributes(lat, angle, steer, image)
-        retval = steer
+        retval = steer * 2.5
 
     cv2.imshow("res", cv2.resize(image, (1280, 720)))
     if CAMERA:
@@ -214,10 +215,8 @@ def plan_steering(classified, image):
 
 
 def applyIPT(image):
-    pts_src = np.array([[174, 377], [301, 44], [545, 51], [659, 379]])
-    pts_dst = np.array([[174, 377], [174, 0], [659, 0], [659, 379]])
-    h, status = cv2.findHomography(pts_src, pts_dst)
-    im_out = cv2.warpPerspective(image, h, (image.shape[1], image.shape[0]))
+    print(MAPPING)
+    im_out = cv2.warpPerspective(image, MAPPING, (2*image.shape[1], 2*image.shape[0]))
 
     return im_out
 
@@ -230,7 +229,7 @@ def test_model(model_name):
 
     # load the video file
     if CAMERA:
-        video = cv2.VideoCapture(1)
+        video = cv2.VideoCapture(0)
     else:
         video_file_path = os.path.join("footage", choose_file())
         video = cv2.VideoCapture(video_file_path)
@@ -241,7 +240,7 @@ def test_model(model_name):
         if not ret:
             print("Video finished")
             break
-
+    
         # frame = applyIPT(frame)
 
         small = cv2.resize(frame, (256, 144))
@@ -264,5 +263,11 @@ if __name__ == "__main__":
         SER = getSerialPort()
     except:
         SER = None
+
+    try:
+        ipm_file = open('./IPM/homographyMatrix.p', 'rb')
+        MAPPING = pickle.load(ipm_file)
+    except:
+        MAPPING = None
     test_model("Gaussian")
 

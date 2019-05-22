@@ -17,7 +17,7 @@ def readmouse(event,x,y,flags,param):
 		counter+=1
 		
 
-image = cv2.imread("./../sampleImages/tape1.jpg")
+image = cv2.imread("./marsfield.jpg")
 
 cv2.namedWindow('image')
 cv2.setMouseCallback('image',readmouse)
@@ -39,6 +39,6 @@ pts_dst = np.array([[x1, y1],[x1, y2],[x2, y2],[x2,y1]])
 
 h, status = cv2.findHomography(pts_src, pts_dst)
 pickle.dump( h, open( "homographyMatrix.p", "wb" ))
-im_out = cv2.warpPerspective(image, h, (image.shape[1],image.shape[0]))
+im_out = cv2.warpPerspective(image, h, (2*image.shape[1],2*image.shape[0]))
 cv2.imshow("image1",im_out)
 cv2.waitKey(0)

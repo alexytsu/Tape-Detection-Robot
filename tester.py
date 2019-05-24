@@ -17,7 +17,12 @@ DEBUG = True
 CAMERA = True
 SER = None
 MAPPING = None
+SHOW_CAMERA = False
 
+def applyIPT(image):
+    im_out = cv2.warpPerspective(image, MAPPING, (int(2.5*image.shape[1]), 2*image.shape[0]))
+
+    return im_out
 
 def mask_image(image, model, frame_n):
 
@@ -197,30 +202,23 @@ def plan_steering(classified, image):
         print("blue")
         lat, angle, steer = getLineAttributes(blueLine)
         writeLineAttributes(lat, angle, steer, image)
-        retval = 2 * steer
+        retval = 2.5 * steer
     elif yellowLine:
         print("yellow")
         lat, angle, steer = getLineAttributes(yellowLine)
         writeLineAttributes(lat, angle, steer, image)
-        retval = 2 * steer
-
-    """
-    cv2.imshow("res", cv2.resize(image, (1280, 720)))
-    if CAMERA:
-        cv2.waitKey(1)
-    else:
-        if cv2.waitKey(0) & 0xFF == ord("q"):
-            exit()
-    """
+        retval = 2.5 * steer
+    if SHOW_CAMERA:
+        cv2.imshow("res", cv2.resize(image, (1280, 720)))
+        if CAMERA:
+            cv2.waitKey(1)
+        else:
+            if cv2.waitKey(0) & 0xFF == ord("q"):
+                exit()
 
     return retval
 
 
-def applyIPT(image):
-    print(MAPPING)
-    im_out = cv2.warpPerspective(image, MAPPING, (2*image.shape[1], 2*image.shape[0]))
-
-    return im_out
 
 
 def test_model(model_name):
@@ -245,9 +243,9 @@ def test_model(model_name):
     
         frame = applyIPT(frame)
 
-        small = cv2.resize(frame, (256, 144))
-        ynew = mask_image(small, model, frame_n)
-        angle = plan_steering(ynew, small)
+        frame = cv2.resize(frame, (128, 72))
+        ynew = mask_image(frame, model, frame_n)
+        angle = plan_steering(ynew, frame)
         if SER:
             SendSpeed(SER, int(angle), 90)
 
@@ -267,7 +265,7 @@ if __name__ == "__main__":
         SER = None
 
     try:
-        ipm_file = open('./IPM/homographyMatrix.p_', 'rb')
+        ipm_file = open('./IPM/asdf.p', 'rb')
         MAPPING = pickle.load(ipm_file)
     except:
         MAPPING = None

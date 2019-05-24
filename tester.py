@@ -17,12 +17,20 @@ DEBUG = True
 CAMERA = True
 SER = None
 MAPPING = None
+TRANSLATION = None
 SHOW_CAMERA = False
 
 def applyIPT(image):
-    im_out = cv2.warpPerspective(image, MAPPING, (int(2.5*image.shape[1]), 2*image.shape[0]))
-
-    return im_out
+    sliderMax = 800
+    rows = image.shape[0]
+    cols = image.shape[1]
+    image = cv2.warpPerspective(image, MAPPING, (int(4*image.shape[1]), 4*image.shape[0]))
+    X, Y, Theta = TRANSLATION
+    M = np.float32([[1,0,X-int(sliderMax/2)],[0,1,Y-int(sliderMax/2)]])
+    image = cv2.warpAffine(image, M, (cols, rows))
+    M = cv2.getRotationMatrix2D((cols/2, rows/2), Theta-90,1)
+    image = cv2.warpAffine(image, M, (cols, rows))
+    return image
 
 def mask_image(image, model, frame_n):
 
@@ -265,8 +273,10 @@ if __name__ == "__main__":
         SER = None
 
     try:
-        ipm_file = open('./IPM/asdf.p', 'rb')
+        ipm_file = open('../IPMtest/homographyMatrix.p', 'rb')
+        trans_file = open('../IPMtest/source/Translation.p', 'rb')
         MAPPING = pickle.load(ipm_file)
+        TRANSLATION = pickle.load(trans_file)
     except:
         MAPPING = None
     test_model("Gaussian")

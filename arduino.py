@@ -5,7 +5,14 @@ import time
 #written by Daniel Huang 
 
 def SendSpeed(ser, steering, speed): #servo and motor interface
-    adjusted_angle = 85 - steering
+    adjusted_angle = 85
+    if abs(steering) < 3:
+        adjusted_angle = 85 - steering
+    else:
+        if steering > 3:
+            adjusted_angle = 60
+        elif steering < -3:
+            adjusted_angle = 115
     checksum = (70+36+adjusted_angle+speed)%256 #calc 8bit checksum 
     try:
         ser.write((('F${}{}{}').format(chr(speed),chr(adjusted_angle),chr(checksum))).encode('utf-8')) #format into ascii string and then write to port

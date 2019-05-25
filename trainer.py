@@ -7,7 +7,7 @@ import pandas as pd
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
-from sklearn.ensemble import AdaBoostClassifier
+from sklearn.ensemble import AdaBoostClassifier, RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.gaussian_process.kernels import RBF
@@ -50,6 +50,7 @@ def train_classifier(data_folder):
     classifier = GaussianNB()
     # classifier = GaussianProcessClassifier(1.0 * RBF(1.0))
     # classifier = KNeighborsClassifier(3)
+    # classifier = RandomForestClassifier(max_depth=5, n_estimators=5, max_features=1)
     model = classifier.fit(X,y)
 
     filepath = os.path.join("trained_models", "Gaussian", "model.sav")

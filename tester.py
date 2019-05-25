@@ -16,11 +16,9 @@ from helper import show_masks, writeLineAttributes
 from nav import plan_steering, getLineAttributes
 
 DEBUG = True
-CAMERA = True
 SER = None
 MAPPING = None
 TRANSLATION = None
-SHOW_CAMERA = False
 
 def applyIPT(image):
     sliderMax = 800
@@ -52,43 +50,6 @@ def mask_image(image, model, frame_n):
 
     return model.predict(Xnew)
 
-    retval = 0
-
-    if navLine is not None:
-        print("nav")
-        lat, angle, steer = getLineAttributes(navLine)
-        writeLineAttributes(lat, angle, steer, image)
-        retval = steer
-    elif blueLine and yellowLine:
-        print("blue + yellow")
-        lat1, angle1, steer1 = getLineAttributes(blueLine)
-        lat2, angle2, steer2 = getLineAttributes(yellowLine)
-        lat = (lat1 + lat2) / 2
-        angle = (angle1 + angle2) / 2
-        steer = (steer1 + steer2) / 2
-        writeLineAttributes(lat, angle, steer, image)
-        retval = steer
-    elif blueLine:
-        print("blue")
-        lat, angle, steer = getLineAttributes(blueLine)
-        writeLineAttributes(lat, angle, steer, image)
-        retval = 2.5 * steer
-    elif yellowLine:
-        print("yellow")
-        lat, angle, steer = getLineAttributes(yellowLine)
-        writeLineAttributes(lat, angle, steer, image)
-        retval = 2.5 * steer
-    if SHOW_CAMERA:
-        cv2.imshow("res", cv2.resize(image, (1280, 720)))
-        if CAMERA:
-            cv2.waitKey(1)
-        else:
-            if cv2.waitKey(0) & 0xFF == ord("q"):
-                exit()
-    return retval
-
-
-
 
 def test_model(model_name):
     # load the model
@@ -100,8 +61,9 @@ def test_model(model_name):
     if CAMERA:
         video = cv2.VideoCapture(4)
     else:
-        video_file_path = os.path.join("footage", choose_file())
-        video = cv2.VideoCapture(video_file_path)
+        # video_file_path = os.path.join("footage", choose_file())
+        # video = cv2.VideoCapture(video_file_path)
+        video = cv2.VideoCapture("./footage/marsfield_02.mkv")
 
     frame_n = 0
     while video.isOpened():
@@ -112,13 +74,16 @@ def test_model(model_name):
     
         #frame = applyIPT(frame)
 
-        frame = cv2.resize(frame, (128, 72))
+        frame = cv2.resize(frame, (480, 360))
+        frame = frame[100:360, 0:480]
         ynew = mask_image(frame, model, frame_n)
         angle = plan_steering(ynew, frame)
         if SER:
             SendSpeed(SER, int(angle), 90)
 
         frame_n += 1
+
+    print("fin")
 
 
 if __name__ == "__main__":

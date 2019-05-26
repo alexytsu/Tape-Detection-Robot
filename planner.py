@@ -15,7 +15,7 @@ def get_spaced_frames(filename, length, get_n):
 
     filepath = os.path.join("footage", filename)
     print(f"From a file of {length} frames we want {get_n} frames")
-    spacing = int((length-1)/get_n)
+    spacing = int((length-10)/get_n) / 2
     print("Spacing: ", spacing)
 
     # initialise loop
@@ -26,15 +26,15 @@ def get_spaced_frames(filename, length, get_n):
     success = True # jumpstart the loop
     while success:
         success, image = video.read()
-        if(success):
-            if count % spacing == 0:
+        if count % spacing == 0:
+            if image is not None:
                 n_frames += 1
                 print(f"Grabbed frame {count}/{length}")
                 frames.append(image)
                 if n_frames >= get_n:
                     break
         else:
-            break
+            pass
         count += 1
 
     print("Finished grabbing on frame:", count)

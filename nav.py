@@ -7,7 +7,7 @@ from fr import PyFrame
 from helper import writeLineAttributes
 
 SHOW_CAMERA = True
-CAMERA = False
+CAMERA = True
 
 def gradientIntercept(line, height):
     start, end = line

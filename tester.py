@@ -13,7 +13,7 @@ from utility import choose_file
 from fr import PyFrame
 from arduino import getSerialPort, SendSpeed
 from helper import show_masks, writeLineAttributes
-from nav import plan_steering, getLineAttributes
+from nav import plan_steering, getLineAttributes, CAMERA
 
 DEBUG = True
 SER = None

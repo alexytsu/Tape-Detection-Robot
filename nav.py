@@ -81,7 +81,6 @@ def analyseLineScatter(image, pointList, height, width):
         angle = int(angle)
         return angle, int(x_avg - width/2)
     except Exception as e:
-        print(e)
         return None, int(x_avg - width/2)
 
 

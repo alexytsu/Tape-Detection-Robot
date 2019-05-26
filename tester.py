@@ -61,7 +61,7 @@ def test_model(model_name):
 
     # load the video file
     if CAMERA:
-        video = cv2.VideoCapture(4)
+        video = cv2.VideoCapture(0)
     else:
         # video_file_path = os.path.join("footage", choose_file())
         # video = cv2.VideoCapture(video_file_path)
@@ -81,6 +81,7 @@ def test_model(model_name):
         frame = frame[250:360, 0:480]
         ynew = mask_image(frame, model, frame_n)
         angle = plan_steering(ynew, frame)
+        print("SeRIAL", SER, "angle", angle)
         if SER:
             SendSpeed(SER, int(angle), 90)
 

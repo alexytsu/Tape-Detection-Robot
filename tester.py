@@ -75,10 +75,10 @@ def test_model(model_name):
             print("Video finished")
             break
     
-        #frame = applyIPT(frame)
+        frame = applyIPT(frame)
 
-        frame = cv2.resize(frame, (480, 360))
-        frame = frame[250:360, 0:480]
+        frame = cv2.resize(frame, (240, 180))
+        #frame = frame[250:360, 0:480]
         ynew = mask_image(frame, model, frame_n)
         angle = plan_steering(ynew, frame)
         print("SeRIAL", SER, "angle", angle)
@@ -103,7 +103,7 @@ if __name__ == "__main__":
         SER = None
 
     try:
-        ipm_file = open('../IPMtest/homographyMatrix.p', 'rb')
+        ipm_file = open('../IPMtest/source/homographyMatrix.p', 'rb')
         trans_file = open('../IPMtest/source/Translation.p', 'rb')
         MAPPING = pickle.load(ipm_file)
         TRANSLATION = pickle.load(trans_file)

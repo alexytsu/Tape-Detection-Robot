@@ -43,12 +43,14 @@ def mask_image(image, model, frame_n):
 
     # find how long the one dimensional form needs to be
     one_dim_length = hsvImage.shape[0] * hsvImage.shape[1]
+
     # now spread out the image [HSV]
     Xnew = np.reshape(hsvImage, (one_dim_length, 3))
+
     # only take H and S
     Xnew = Xnew[:, 0:2]
-
-    return model.predict(Xnew)
+    result = model.predict(Xnew)
+    return result
 
 
 def test_model(model_name):
@@ -66,6 +68,7 @@ def test_model(model_name):
         video = cv2.VideoCapture("./footage/marsfield_02.mkv")
 
     frame_n = 0
+    mask_image.prev_frame = None
     while video.isOpened():
         ret, frame = video.read()
         if not ret:

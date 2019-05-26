@@ -5,21 +5,93 @@ import numpy as np
 
 from fr import PyFrame
 from helper import writeLineAttributes
-SHOW_CAMERA = False
+
+SHOW_CAMERA = True
 CAMERA = False
 
-def getLineAttributes(line):
-    lateral_error = 0
-    end, start = line
+def gradientIntercept(line, height):
+    start, end = line
     x1, y1 = start
     x2, y2 = end
+    y1 = height - y1
+    y2 = height - y2
+    start = (x1, y1)
+    end = (x2, y2)
+    # m, b = np.polyfit(start, end, 1)
+
+
+def getLineAttributes(line, width, height):
+    lateral_error = 0
+    end, start = line
+    gradientIntercept(line, height)
+    x1, y1 = start
+    x2, y2 = end
+
+    if y1 < y2:
+        x1, y1, x2, y2 = x2, y2, x1, y1
+
     angle_hor = x2 - x1
     angle_ver = y1 - y2
     angle_error = math.degrees(math.atan2(angle_hor, angle_ver))
-    I = 0.3
-    P = 0.4
-    steering_angle = I * lateral_error + P * angle_error
-    return lateral_error, angle_error, steering_angle
+
+    return angle_error
+
+def analyseLineScatter(image, pointList, height, width):
+    blank_image = np.zeros((height, width), np.uint8)
+    xy_sum = 0
+    y_sum = 0
+    for point in pointList:
+        x, y = point
+        blank_image[y][x] = 255
+        xy_sum = xy_sum + x * y
+        y_sum = y_sum + y
+
+    x_avg = width/2
+    try:
+        x_avg = xy_sum / y_sum
+    except:
+        pass
+
+    houghLines = []
+    lines = cv2.HoughLines(blank_image, 4, np.pi / 50, 20, None, 0, 0)
+    if lines is not None:
+        for i in range(0, len(lines)):
+            rho = lines[i][0][0]
+            theta = lines[i][0][1]
+            a = math.cos(theta)
+            b = math.sin(theta)
+            x0 = a * rho
+            y0 = b * rho
+            x1 = int(x0 + 1000 * (-b))
+            y1 = int(y0 + 1000 * (a))
+            x2 = int(x0 - 1000 * (-b))
+            y2 = int(y0 - 1000 * (a))
+            pt1 = (x1, y1)
+            pt2 = (x2, y2)
+            houghLines.append((pt2, pt1))
+            image = cv2.line(image, pt1, pt2, (255, 255, 255), 1, cv2.LINE_AA)
+
+    houghAngles = []
+    for line in houghLines:
+        angle = getLineAttributes(line, width, height)
+        houghAngles.append(angle)
+
+    try:
+        angle = sum(houghAngles)/len(houghAngles)
+        angle = int(angle)
+        return angle, int(x_avg - width/2)
+    except Exception as e:
+        print(e)
+        return None, int(x_avg - width/2)
+
+
+def plot_pointlist(image, pointList, color):
+    for point in pointList:
+        try:
+            x, y = point
+            cv2.circle(image, (x, y), 2, color, 1)
+        except Exception as e:
+            print(e)
 
 
 def plan_steering(classified, image):
@@ -30,121 +102,57 @@ def plan_steering(classified, image):
     c_array = imagified / 5
     cFrame = PyFrame(c_array)
 
-    pointList = cFrame.getTapePoints()
+    cFrame.getTapePoints()
 
-    lateral_error = 0
     pointList = cFrame.getMidPoints()
-    for point in pointList:
-        try:
-            x, y = point
-            lateral_error += x - width / 2
-            cv2.circle(image, (x, y), 2, (0, 100, 0), 1)
-        except:
-            pass
-
-    try:
-        lateral_error = lateral_error / len(pointList)
-    except:
-        print("No Points")
+    plot_pointlist(image, pointList, (0,100,0))
+    midAngle, midOffset = analyseLineScatter(image, pointList, height, width)
 
     pointList = cFrame.getDarkPoints()
-    for point in pointList:
-        x, y = point
-        try:
-            cv2.circle(image, (x, y), 2, (255, 100, 100), 1)
-        except:
-            print("Failed")
-
-    blank_image = np.zeros((height,width), np.uint8)
-    for point in pointList:
-        x, y = point
-        blank_image[y][x] = 255
-
-    lines = cv2.HoughLines(blank_image, 4, np.pi / 180, 100, None, 0, 0)
-    print(lines)
-    if lines is not None:
-        for i in range(0, len(lines)):
-            rho = lines[i][0][0]
-            theta = lines[i][0][1]
-            a = math.cos(theta)
-            b = math.sin(theta)
-            x0 = a * rho
-            y0 = b * rho
-            pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
-            pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
-            image = cv2.line(image, pt1, pt2, (255), 1, cv2.LINE_AA)
+    plot_pointlist(image, pointList, (100, 0, 0))
+    blueAngle, blueOffset = analyseLineScatter(image, pointList, height, width)
 
     pointList = cFrame.getLightPoints()
-    for point in pointList:
-        x, y = point
-        try:
-            cv2.circle(image, (x, y), 2, (0, 100, 100), 1)
-        except:
-            print("Failed")
+    plot_pointlist(image, pointList, (0, 0, 100))
+    yellowAngle, yellowOffset = analyseLineScatter(image, pointList, height, width)
+
+    angle = 0
+    offset = 0
+    steering_angle = 0
+
+    # draw the angle
+    midx = int(width/2)
+    midy = int(height/2)
+
+    if midAngle:
+        angle = int(midAngle)
+        offset = midOffset
+        offset_angle = int(math.degrees(math.atan2(offset, midy)))
+        steering_angle = int((offset_angle * 9 + angle) / 10)
+    elif blueAngle and yellowAngle:
+        angle = int((blueAngle + yellowAngle)/2)
+        offset = int((blueOffset + yellowOffset)/2)
+        steering_angle = angle
+    elif blueAngle:
+        angle = int(blueAngle)
+        offset = blueOffset
+        steering_angle = angle
+    elif yellowAngle:
+        angle = int(yellowAngle)
+        offset = yellowOffset
+        steering_angle = angle
 
 
-    """
-    cv2.imshow("image", cv2.resize(image, (1280,720)))
-    cv2.imshow("houghPre", blank_image)
-    if cv2.waitKey(0) & 0xFF == ord("q"):
-        exit()
-    """
+    xdiff = int(math.tan(math.radians(angle)) * midy)
+    bottomPoint = (midx, height)
+    navPoint = (midx + xdiff, midy)
+    cv2.line(image, bottomPoint, navPoint, (0, 0, 0), 1, cv2.LINE_AA)
+    cv2.line(image, (midx, midy), (midx + offset, midy), (100, 100, 100), 1, cv2.LINE_AA)
 
-    blueLine = None
-    yellowLine = None
-    navLine = None
-
-    lineList = cFrame.getBlueLine()
-    for line in lineList:
-        end, start = line
-        x1, y1 = end
-        x2, y2 = start
-        cv2.line(image, (x1, y1), (x2, y2), (255, 0, 0), 1)
-        blueLine = line
-
-    lineList = cFrame.getYellowLine()
-    for line in lineList:
-        end, start = line
-        x1, y1 = end
-        x2, y2 = start
-        cv2.line(image, (x1, y1), (x2, y2), (0, 255, 255), 1)
-        yellowLine = line
-
-    lineList = cFrame.getNavLine()
-    for line in lineList:
-        end, start = line
-        x1, y1 = start
-        x2, y2 = end
-        cv2.line(image, (x1, y1), (x2, y2), (0, 255, 0), 2)
-        navLine = line
-
-
-    retval = 0
-
-    if navLine is not None:
-        print("nav")
-        lat, angle, steer = getLineAttributes(navLine)
-        writeLineAttributes(lat, angle, steer, image)
-        retval = steer
-    elif blueLine and yellowLine:
-        print("blue + yellow")
-        lat1, angle1, steer1 = getLineAttributes(blueLine)
-        lat2, angle2, steer2 = getLineAttributes(yellowLine)
-        lat = (lat1 + lat2) / 2
-        angle = (angle1 + angle2) / 2
-        steer = (steer1 + steer2) / 2
-        writeLineAttributes(lat, angle, steer, image)
-        retval = steer
-    elif blueLine:
-        print("blue")
-        lat, angle, steer = getLineAttributes(blueLine)
-        writeLineAttributes(lat, angle, steer, image)
-        retval = 2.5 * steer
-    elif yellowLine:
-        print("yellow")
-        lat, angle, steer = getLineAttributes(yellowLine)
-        writeLineAttributes(lat, angle, steer, image)
-        retval = 2.5 * steer
+    xdiff = int(math.tan(math.radians(steering_angle)) * midy)
+    bottomPoint = (midx, height)
+    navPoint = (midx + xdiff, midy)
+    cv2.line(image, bottomPoint, navPoint, (0, 0, 0), 3, cv2.LINE_AA)
 
     if SHOW_CAMERA:
         cv2.imshow("res", cv2.resize(image, (1280, 720)))
@@ -153,4 +161,4 @@ def plan_steering(classified, image):
         else:
             if cv2.waitKey(0) & 0xFF == ord("q"):
                 exit()
-    return retval
+    return steering_angle

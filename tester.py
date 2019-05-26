@@ -78,7 +78,7 @@ def test_model(model_name):
         #frame = applyIPT(frame)
 
         frame = cv2.resize(frame, (480, 360))
-        frame = frame[100:360, 0:480]
+        frame = frame[250:360, 0:480]
         ynew = mask_image(frame, model, frame_n)
         angle = plan_steering(ynew, frame)
         if SER:

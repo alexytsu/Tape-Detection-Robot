@@ -4,6 +4,7 @@ import argparse
 import pdb
 import sys
 import math
+from threading import Thread
 
 import cv2
 import numpy as np
@@ -19,6 +20,29 @@ DEBUG = True
 SER = None
 MAPPING = None
 TRANSLATION = None
+
+class WebcamVideoStream:
+    def __init__(self, src = 0):
+        self.stream = cv2.VideoCapture(src)
+        (self.grabbed, self.frame) = self.stream.read()
+        self.stopped = False
+
+    def start(self):
+        Thread(target=self.update, args=()).start()
+        return self
+    
+    def update(self):
+        while True:
+            if self.stopped:
+                return
+
+            (self.grabbed, self.frame) = self.stream.read()
+
+    def read(self):
+        return self.frame
+
+    def stop(self):
+        self.stopped = True
 
 def applyIPT(image):
     sliderMax = 800
@@ -61,19 +85,16 @@ def test_model(model_name):
 
     # load the video file
     if CAMERA:
-        video = cv2.VideoCapture(0)
+        video = WebcamVideoStream(src=0).start()
+
     else:
         # video_file_path = os.path.join("footage", choose_file())
         # video = cv2.VideoCapture(video_file_path)
         video = cv2.VideoCapture("./footage/marsfield_02.mkv")
 
     frame_n = 0
-    mask_image.prev_frame = None
-    while video.isOpened():
-        ret, frame = video.read()
-        if not ret:
-            print("Video finished")
-            break
+    while True:
+        frame = video.read()
     
         frame = applyIPT(frame)
 

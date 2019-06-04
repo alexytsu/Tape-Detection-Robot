@@ -98,12 +98,13 @@ def test_model(model_name):
     
         frame = applyIPT(frame)
 
-        w = 250
+        w = 300
         h = 300
         frame = cv2.resize(frame, (w, h))
-#        frame = frame[0:w, int(h/2):h]
+        frame = frame[int(3*h/6):int(5*h/6), int(w/4)+20:int(3*w/4)-20]
         ynew = mask_image(frame, model, frame_n)
         angle = plan_steering(ynew, frame)
+        angle = int(2*angle/3)
         print("SeRIAL", SER, "angle", angle)
         if SER:
             SendSpeed(SER, int(angle), 90)

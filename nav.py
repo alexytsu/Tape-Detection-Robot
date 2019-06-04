@@ -127,7 +127,7 @@ def plan_steering(classified, image):
         angle = int(midAngle)
         offset = midOffset
         offset_angle = int(math.degrees(math.atan2(offset, midy)))
-        steering_angle = int((offset_angle * 9 + angle) / 10)
+        steering_angle = int(int((offset_angle * 2.5 + angle * 7.5) / 10)/2)
     elif blueAngle and yellowAngle:
         angle = int((blueAngle + yellowAngle)/2)
         offset = int((blueOffset + yellowOffset)/2)
@@ -135,11 +135,11 @@ def plan_steering(classified, image):
     elif blueAngle:
         angle = int(blueAngle)
         offset = blueOffset
-        steering_angle = angle
+        steering_angle = angle + 8
     elif yellowAngle:
         angle = int(yellowAngle)
         offset = yellowOffset
-        steering_angle = angle
+        steering_angle = angle - 8
 
 
     xdiff = int(math.tan(math.radians(angle)) * midy)

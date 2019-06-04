@@ -53,7 +53,7 @@ def analyseLineScatter(image, pointList, height, width):
         pass
 
     houghLines = []
-    lines = cv2.HoughLines(blank_image, 4, np.pi / 50, 20, None, 0, 0)
+    lines = cv2.HoughLines(blank_image, 4, np.pi / 50, 30, None, 0, 0)
     if lines is not None:
         for i in range(0, len(lines)):
             rho = lines[i][0][0]

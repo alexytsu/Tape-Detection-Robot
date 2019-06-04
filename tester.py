@@ -20,6 +20,7 @@ DEBUG = True
 SER = None
 MAPPING = None
 TRANSLATION = None
+CROP = None
 
 class WebcamVideoStream:
     def __init__(self, src = 0):
@@ -54,6 +55,8 @@ def applyIPT(image):
     image = cv2.warpAffine(image, M, (cols, rows))
     M = cv2.getRotationMatrix2D((cols/2, rows/2), Theta-90,1)
     image = cv2.warpAffine(image, M, (cols, rows))
+    xB, xE, yB, yE = CROP
+    image = image[yB:yE,xB:xE]
     return image
 
 def mask_image(image, model, frame_n):
@@ -101,7 +104,7 @@ def test_model(model_name):
         w = 300
         h = 300
         frame = cv2.resize(frame, (w, h))
-        frame = frame[int(3*h/6):int(5*h/6), int(w/4)+20:int(3*w/4)-20]
+        # frame = frame[int(3*h/6):int(5*h/6), int(w/4)+20:int(3*w/4)-20]
         ynew = mask_image(frame, model, frame_n)
         angle = plan_steering(ynew, frame)
         angle = int(2*angle/3)
@@ -129,8 +132,10 @@ if __name__ == "__main__":
     try:
         ipm_file = open('../IPMtest/source/homographyMatrix.p', 'rb')
         trans_file = open('../IPMtest/source/Translation.p', 'rb')
+        crop_file = open('../IPMtest/source/Crop.p', 'rb')
         MAPPING = pickle.load(ipm_file)
         TRANSLATION = pickle.load(trans_file)
+        CROP = pickle.load(crop_file)
     except:
         MAPPING = None
     test_model("Gaussian")

@@ -34,6 +34,11 @@ vector<pair<int, int>> Frame::getTapePoints()
                 n_dark++;
                 dark_j += j;
             }
+            if (arr[i][j] == 0.6)
+            {
+                n_light++;
+                light_j += j;
+            }
         }
 
         if (n_dark != 0)

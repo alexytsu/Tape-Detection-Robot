@@ -1,4 +1,5 @@
 import cv2
+import numpy as np
 
 def show_masks(ynew, image):
     roi = np.where(ynew == 1)[0]

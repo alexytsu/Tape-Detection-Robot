@@ -45,7 +45,7 @@ class WebcamVideoStream:
         self.stopped = True
 
 def applyIPT(image):
-    sliderMax = 800
+    sliderMax = 1000
     rows = image.shape[0]
     cols = image.shape[1]
     image = cv2.warpPerspective(image, MAPPING, (int(4*image.shape[1]), 4*image.shape[0]))
@@ -98,8 +98,10 @@ def test_model(model_name):
     
         frame = applyIPT(frame)
 
-        frame = cv2.resize(frame, (240, 180))
-        #frame = frame[250:360, 0:480]
+        w = 250
+        h = 300
+        frame = cv2.resize(frame, (w, h))
+#        frame = frame[0:w, int(h/2):h]
         ynew = mask_image(frame, model, frame_n)
         angle = plan_steering(ynew, frame)
         print("SeRIAL", SER, "angle", angle)

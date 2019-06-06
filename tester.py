@@ -14,7 +14,7 @@ from utility import choose_file
 from fr import PyFrame
 from arduino import getSerialPort, SendSpeed
 from helper import show_masks, writeLineAttributes
-from nav import plan_steering, getLineAttributes, CAMERA
+from nav import plan_steering, getLineAttributes, CAMERA, AngleBuffer
 
 DEBUG = True
 SER = None
@@ -91,23 +91,30 @@ def test_model(model_name):
         video = WebcamVideoStream(src=0).start()
 
     else:
-        # video_file_path = os.path.join("footage", choose_file())
-        # video = cv2.VideoCapture(video_file_path)
-        video = cv2.VideoCapture("./footage/marsfield_02.mkv")
+        video_file_path = os.path.join("footage", choose_file())
+        video = cv2.VideoCapture(video_file_path)
+        # video = cv2.VideoCapture("./footage/marsfield_02.mkv")
 
     frame_n = 0
+    smoother = AngleBuffer(3)
     while True:
-        frame = video.read()
+        frame = None
+        if CAMERA:
+            frame = video.read()
+            frame = applyIPT(frame)
+        else:
+            retval, frame = video.read()
+            if not retval:
+                pass
     
-        frame = applyIPT(frame)
 
         w = 300
         h = 300
         frame = cv2.resize(frame, (w, h))
-        # frame = frame[int(3*h/6):int(5*h/6), int(w/4)+20:int(3*w/4)-20]
         ynew = mask_image(frame, model, frame_n)
         angle = plan_steering(ynew, frame)
-        angle = int(2*angle/3)
+        smoother.add_new(angle)
+        angle = smoother.get_angle()
         print("SeRIAL", SER, "angle", angle)
         if SER:
             SendSpeed(SER, int(angle), 90)

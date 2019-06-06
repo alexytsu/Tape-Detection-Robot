@@ -9,6 +9,19 @@ from helper import writeLineAttributes
 SHOW_CAMERA = True
 CAMERA = True
 
+class AngleBuffer():
+    def __init__(self, length):
+        self.length = length
+        self.current = 0
+        self.buffer = [0] * length
+    
+    def add_new(self, angle):
+        self.buffer[self.current % self.length] = angle
+        self.current += 1
+
+    def get_angle(self):
+        return int(sum(self.buffer) / self.length)
+
 def gradientIntercept(line, height):
     start, end = line
     x1, y1 = start
@@ -53,7 +66,11 @@ def analyseLineScatter(image, pointList, height, width):
         pass
 
     houghLines = []
-    lines = cv2.HoughLines(blank_image, 4, np.pi / 50, 30, None, 0, 0)
+
+    # LOWER NUMBER === MOREEE SPAGHETTIIII
+    SPAGHETTI = 20
+
+    lines = cv2.HoughLines(blank_image, 4, np.pi / 50, SPAGHETTI, None, 0, 0)
     if lines is not None:
         for i in range(0, len(lines)):
             rho = lines[i][0][0]

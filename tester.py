@@ -22,6 +22,8 @@ MAPPING = None
 TRANSLATION = None
 CROP = None
 
+go = 95
+
 class WebcamVideoStream:
     def __init__(self, src = 0):
         self.stream = cv2.VideoCapture(src)
@@ -96,7 +98,7 @@ def test_model(model_name):
         # video = cv2.VideoCapture("./footage/marsfield_02.mkv")
 
     frame_n = 0
-    smoother = AngleBuffer(3)
+    smoother = AngleBuffer(1)
     while True:
         frame = None
         if CAMERA:
@@ -112,12 +114,20 @@ def test_model(model_name):
         h = 300
         frame = cv2.resize(frame, (w, h))
         ynew = mask_image(frame, model, frame_n)
-        angle = plan_steering(ynew, frame)
+        try:
+            angle,speed = plan_steering(ynew, frame)
+        except:
+            angle = 0
+            speed = 94
         smoother.add_new(angle)
         angle = smoother.get_angle()
         print("SeRIAL", SER, "angle", angle)
+        if go == 95:
+            go == 96
+        else:
+            go == 95
         if SER:
-            SendSpeed(SER, int(angle), 90)
+            SendSpeed(SER, int(angle), go)
 
         frame_n += 1
 

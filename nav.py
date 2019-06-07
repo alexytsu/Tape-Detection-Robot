@@ -68,7 +68,7 @@ def analyseLineScatter(image, pointList, height, width):
     houghLines = []
 
     # LOWER NUMBER === MOREEE SPAGHETTIIII
-    SPAGHETTI = 20
+    SPAGHETTI = 18
 
     lines = cv2.HoughLines(blank_image, 4, np.pi / 50, SPAGHETTI, None, 0, 0)
     if lines is not None:
@@ -140,6 +140,8 @@ def plan_steering(classified, image):
     midx = int(width/2)
     midy = int(height/2)
 
+    speed = 95
+
     if midAngle:
         angle = int(midAngle)
         offset = midOffset
@@ -156,7 +158,9 @@ def plan_steering(classified, image):
     elif yellowAngle:
         angle = int(yellowAngle)
         offset = yellowOffset
-        steering_angle = angle - 8
+        steering_angle = -50
+    else:
+        steering_angle = -5
 
 
     xdiff = int(math.tan(math.radians(angle)) * midy)
@@ -177,4 +181,4 @@ def plan_steering(classified, image):
         else:
             if cv2.waitKey(0) & 0xFF == ord("q"):
                 exit()
-    return steering_angle
+    return steering_angle, speed

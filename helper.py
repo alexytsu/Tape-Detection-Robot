@@ -6,13 +6,19 @@ def show_masks(ynew, image, name, w, h):
     for loc in roi:
         row = int(loc / image.shape[1])
         col = loc % image.shape[1]
-        image[row][col] = (0, 200, 100)
+        image[row][col] = (200, 50, 50)
 
     roi = np.where(ynew == 3)[0]
     for loc in roi:
         row = int(loc / image.shape[1])
         col = loc % image.shape[1]
-        image[row][col] = (200, 200, 100)
+        image[row][col] = (0, 200, 250)
+
+    roi = np.where(ynew == 2)[0]
+    for loc in roi:
+        row = int(loc / image.shape[1])
+        col = loc % image.shape[1]
+        image[row][col] = (0, 0, 0)
 
     roi = np.where(ynew == 4)[0]
     for loc in roi:

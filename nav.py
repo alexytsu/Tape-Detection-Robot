@@ -66,7 +66,7 @@ def analyseLineScatter(image, pointList, height, width):
     houghLines = []
 
     # LOWER NUMBER === MOREEE SPAGHETTIIII
-    SPAGHETTI = 10
+    SPAGHETTI = 20
 
     lines = cv2.HoughLines(blank_image, 4, np.pi / 50, SPAGHETTI, None, 0, 0)
     if lines is not None:
@@ -103,7 +103,7 @@ def plot_pointlist(image, pointList, color):
     for point in pointList:
         try:
             x, y = point
-            cv2.circle(image, (x, y), 2, color, 1)
+            cv2.circle(image, (x, y), 2, color, 2)
         except Exception as e:
             print(e)
 
@@ -119,15 +119,18 @@ def plan_steering(classified, image, show_camera):
     cFrame.getTapePoints()
 
     pointList = cFrame.getMidPoints()
-    plot_pointlist(image, pointList, (0,100,0))
+    if show_camera:
+        plot_pointlist(image, pointList, (50,255,50))
     midAngle, midOffset = analyseLineScatter(image, pointList, height, width)
 
     pointList = cFrame.getDarkPoints()
-    plot_pointlist(image, pointList, (100, 0, 0))
+    if show_camera:
+        plot_pointlist(image, pointList, (255,50,50))
     blueAngle, blueOffset = analyseLineScatter(image, pointList, height, width)
 
     pointList = cFrame.getLightPoints()
-    plot_pointlist(image, pointList, (0, 0, 100))
+    if show_camera:
+        plot_pointlist(image, pointList, (0, 100, 100))
     yellowAngle, yellowOffset = analyseLineScatter(image, pointList, height, width)
 
     angle = 0
@@ -161,22 +164,22 @@ def plan_steering(classified, image, show_camera):
         steering_angle = -5
 
 
-    try:
-        xdiff = int(math.tan(math.radians(angle)) * midy)
-        bottomPoint = (midx, height)
-        navPoint = (midx + xdiff, midy)
-        cv2.line(image, bottomPoint, navPoint, (0, 0, 0), 1, cv2.LINE_AA)
-        cv2.line(image, (midx, midy), (midx + offset, midy), (100, 100, 100), 1, cv2.LINE_AA)
-
-        xdiff = int(math.tan(math.radians(steering_angle)) * midy)
-        bottomPoint = (midx, height)
-        navPoint = (midx + xdiff, midy)
-        cv2.line(image, bottomPoint, navPoint, (255, 255, 255), 3, cv2.LINE_AA)
-    except:
-        print("failed to draw some lines")
-        pass
-
     if show_camera:
+        try:
+            xdiff = int(math.tan(math.radians(angle)) * midy)
+            bottomPoint = (midx, height)
+            navPoint = (midx + xdiff, midy)
+            cv2.line(image, bottomPoint, navPoint, (0, 0, 0), 1, cv2.LINE_AA)
+            cv2.line(image, (midx, midy), (midx + offset, midy), (100, 100, 100), 1, cv2.LINE_AA)
+
+            xdiff = int(math.tan(math.radians(steering_angle)) * midy)
+            bottomPoint = (midx, height)
+            navPoint = (midx + xdiff, midy)
+            cv2.line(image, bottomPoint, navPoint, (255, 255, 255), 3, cv2.LINE_AA)
+        except:
+            print("failed to draw some lines")
+            pass
+
         cv2.imshow("res", cv2.resize(image, (1280, 720)))
         if cv2.waitKey(1) & 0xFF == ord("q"):
             exit()

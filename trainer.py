@@ -85,7 +85,7 @@ def create_lookup(classifier, data, model, path=None):
             result =  model.predict([np.array([h,s])])[0]
             if result == 1 or result == 3:
                 print(f"Storing H:{h} with S:{s} as {answers[result]} {result}")
-            COLOR_LOOKUP[h][h] = int(result)
+            COLOR_LOOKUP[s][h] = int(result)
     
     if not path is None:
         file = open(path, "wb")

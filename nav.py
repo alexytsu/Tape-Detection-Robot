@@ -1,4 +1,5 @@
 import math
+import pdb
 
 import cv2
 import numpy as np
@@ -8,6 +9,19 @@ from helper import writeLineAttributes
 
 SHOW_CAMERA = True
 CAMERA = True
+
+class AngleBuffer():
+    def __init__(self, length):
+        self.length = length
+        self.current = 0
+        self.buffer = [0] * length
+    
+    def add_new(self, angle):
+        self.buffer[self.current % self.length] = angle
+        self.current += 1
+
+    def get_angle(self):
+        return int(sum(self.buffer) / self.length)
 
 def gradientIntercept(line, height):
     start, end = line
@@ -50,10 +64,15 @@ def analyseLineScatter(image, pointList, height, width):
     try:
         x_avg = xy_sum / y_sum
     except:
+        print("FAILED TO FIND X_CENTROID")
         pass
 
     houghLines = []
-    lines = cv2.HoughLines(blank_image, 4, np.pi / 50, 20, None, 0, 0)
+
+    # LOWER NUMBER === MOREEE SPAGHETTIIII
+    SPAGHETTI = 20
+
+    lines = cv2.HoughLines(blank_image, 4, np.pi / 50, SPAGHETTI, None, 0, 0)
     if lines is not None:
         for i in range(0, len(lines)):
             rho = lines[i][0][0]
@@ -81,6 +100,7 @@ def analyseLineScatter(image, pointList, height, width):
         angle = int(angle)
         return angle, int(x_avg - width/2)
     except Exception as e:
+        print("FAILED TO GET ANGLES")
         return None, int(x_avg - width/2)
 
 
@@ -123,11 +143,13 @@ def plan_steering(classified, image):
     midx = int(width/2)
     midy = int(height/2)
 
+    speed = 95
+
     if midAngle:
         angle = int(midAngle)
         offset = midOffset
         offset_angle = int(math.degrees(math.atan2(offset, midy)))
-        steering_angle = int((offset_angle * 9 + angle) / 10)
+        steering_angle = int(int((offset_angle * 2.5 + angle * 7.5) / 10)/2)
     elif blueAngle and yellowAngle:
         angle = int((blueAngle + yellowAngle)/2)
         offset = int((blueOffset + yellowOffset)/2)
@@ -135,23 +157,28 @@ def plan_steering(classified, image):
     elif blueAngle:
         angle = int(blueAngle)
         offset = blueOffset
-        steering_angle = angle
+        steering_angle = angle + 8
     elif yellowAngle:
         angle = int(yellowAngle)
         offset = yellowOffset
-        steering_angle = angle
+        steering_angle = -50
+    else:
+        steering_angle = -5
 
 
-    xdiff = int(math.tan(math.radians(angle)) * midy)
-    bottomPoint = (midx, height)
-    navPoint = (midx + xdiff, midy)
-    cv2.line(image, bottomPoint, navPoint, (0, 0, 0), 1, cv2.LINE_AA)
-    cv2.line(image, (midx, midy), (midx + offset, midy), (100, 100, 100), 1, cv2.LINE_AA)
+    try:
+        xdiff = int(math.tan(math.radians(angle)) * midy)
+        bottomPoint = (midx, height)
+        navPoint = (midx + xdiff, midy)
+        cv2.line(image, bottomPoint, navPoint, (0, 0, 0), 1, cv2.LINE_AA)
+        cv2.line(image, (midx, midy), (midx + offset, midy), (100, 100, 100), 1, cv2.LINE_AA)
 
-    xdiff = int(math.tan(math.radians(steering_angle)) * midy)
-    bottomPoint = (midx, height)
-    navPoint = (midx + xdiff, midy)
-    cv2.line(image, bottomPoint, navPoint, (0, 0, 0), 3, cv2.LINE_AA)
+        xdiff = int(math.tan(math.radians(steering_angle)) * midy)
+        bottomPoint = (midx, height)
+        navPoint = (midx + xdiff, midy)
+        cv2.line(image, bottomPoint, navPoint, (255, 255, 255), 3, cv2.LINE_AA)
+    except:
+        print("Failed to draw lines")
 
     if SHOW_CAMERA:
         cv2.imshow("res", cv2.resize(image, (1280, 720)))
@@ -160,4 +187,4 @@ def plan_steering(classified, image):
         else:
             if cv2.waitKey(0) & 0xFF == ord("q"):
                 exit()
-    return steering_angle
+    return steering_angle, speed

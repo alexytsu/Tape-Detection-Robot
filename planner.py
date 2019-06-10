@@ -77,10 +77,22 @@ class HMI():
 def gap():
     print("\n______________________________")
 
-if __name__ == "__main__":
+def collect_points(filename=None):
     print("===== PLANNER APP: pick some points for the classifier to read =====")
-    filename = choose_file()
+    if filename is None:
+        filename = choose_file("footage")
+
+    video_name = os.path.splitext(filename)[0] 
     print("Selected:", filename) 
+
+    try:
+        os.mkdir(os.path.join("training_data", video_name))
+    except FileExistsError:
+        response =  input("Data already exists. Would you like to retrain? (y/n)")
+        if response == 'y':
+            pass
+        else:
+            return
 
     # show some basic metrics about the video
     gap()
@@ -121,7 +133,10 @@ if __name__ == "__main__":
 
             except IndexError:
                 print("You didn't select any points")
-        
+
         filename = colour + ".csv"
-        filepath = os.path.join("training_data", filename)
+        filepath = os.path.join("training_data", video_name, filename)
         total_data.to_csv(filepath)
+
+if __name__ == "__main__":
+    collect_points()

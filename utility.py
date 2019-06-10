@@ -2,13 +2,13 @@ import os
 
 import cv2
 
-def choose_file():
+def choose_file(folder):
     """
     Let the user choose the file they wish to work on
     """
     
     # List all the video files we have 
-    video_files = os.listdir("footage")
+    video_files = os.listdir(folder)
     n_files = len(video_files)
     for idx, video in enumerate(video_files):
         print(f"[{idx}]: {video}")

@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 
-def show_masks(ynew, image, name):
+def show_masks(ynew, image, name, w, h):
     roi = np.where(ynew == 1)[0]
     for loc in roi:
         row = int(loc / image.shape[1])
@@ -20,10 +20,8 @@ def show_masks(ynew, image, name):
         col = loc % image.shape[1]
         image[row][col] = (0, 0, 0)
 
-    image = cv2.resize(image, (1280, 720))
-    cv2.imshow(name, image)
-    if cv2.waitKey(1) & 0xFF == ord("q"):
-        exit()
+    image = cv2.resize(image, (w, h))
+    return image
 
 def writeLineAttributes(lat, angle, steer, image):
     cv2.putText(

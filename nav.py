@@ -7,9 +7,6 @@ import numpy as np
 from fr import PyFrame
 from helper import writeLineAttributes
 
-SHOW_CAMERA = True
-CAMERA = True
-
 class AngleBuffer():
     def __init__(self, length):
         self.length = length
@@ -64,13 +61,12 @@ def analyseLineScatter(image, pointList, height, width):
     try:
         x_avg = xy_sum / y_sum
     except:
-        print("FAILED TO FIND X_CENTROID")
         pass
 
     houghLines = []
 
     # LOWER NUMBER === MOREEE SPAGHETTIIII
-    SPAGHETTI = 20
+    SPAGHETTI = 10
 
     lines = cv2.HoughLines(blank_image, 4, np.pi / 50, SPAGHETTI, None, 0, 0)
     if lines is not None:
@@ -100,7 +96,6 @@ def analyseLineScatter(image, pointList, height, width):
         angle = int(angle)
         return angle, int(x_avg - width/2)
     except Exception as e:
-        print("FAILED TO GET ANGLES")
         return None, int(x_avg - width/2)
 
 
@@ -113,7 +108,7 @@ def plot_pointlist(image, pointList, color):
             print(e)
 
 
-def plan_steering(classified, image):
+def plan_steering(classified, image, show_camera):
     height = image.shape[0]
     width = image.shape[1]
 
@@ -149,7 +144,7 @@ def plan_steering(classified, image):
         angle = int(midAngle)
         offset = midOffset
         offset_angle = int(math.degrees(math.atan2(offset, midy)))
-        steering_angle = int(int((offset_angle * 2.5 + angle * 7.5) / 10)/2)
+        steering_angle = int(int((offset_angle * 7.5 + angle * 2.5) / 10)/2)
     elif blueAngle and yellowAngle:
         angle = int((blueAngle + yellowAngle)/2)
         offset = int((blueOffset + yellowOffset)/2)
@@ -178,13 +173,11 @@ def plan_steering(classified, image):
         navPoint = (midx + xdiff, midy)
         cv2.line(image, bottomPoint, navPoint, (255, 255, 255), 3, cv2.LINE_AA)
     except:
-        print("Failed to draw lines")
+        print("failed to draw some lines")
+        pass
 
-    if SHOW_CAMERA:
+    if show_camera:
         cv2.imshow("res", cv2.resize(image, (1280, 720)))
-        if CAMERA:
-            cv2.waitKey(1)
-        else:
-            if cv2.waitKey(0) & 0xFF == ord("q"):
-                exit()
+        if cv2.waitKey(1) & 0xFF == ord("q"):
+            exit()
     return steering_angle, speed

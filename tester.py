@@ -14,36 +14,41 @@ from utility import choose_file
 from fr import PyFrame
 from arduino import getSerialPort, SendSpeed
 from helper import show_masks, writeLineAttributes
-from nav import plan_steering, getLineAttributes, CAMERA, SHOW_CAMERA, AngleBuffer
-from vision import WebcamVideoStream, applyIPT, get_edges, mask_lookup
+from nav import plan_steering, getLineAttributes, AngleBuffer
+from vision import applyIPT, get_edges, mask_lookup, WebcamVideoStream
+from trainer import create_lookup, train_classifier
+from planner import collect_points
 
 DEBUG = True
 SER = None
 MAPPING = None
 TRANSLATION = None
 CROP = None
+CAMERA = True
 
 go = 95
 
-def test_model(model_name, COLOR_LOOKUP):
+
+def test_model(color_table, filename=None):
 
     # load the video file
     if CAMERA:
-        video = WebcamVideoStream(src=0).start()
+        video = WebcamVideoStream(src=2).start()
     else:
-        video_file_path = os.path.join("footage", choose_file())
+        """
+        video_file_path = os.path.join("footage", choose_file("footage"))
         video = cv2.VideoCapture(video_file_path)
-        # video = cv2.VideoCapture("./footage/MCIC_variable.mkv")
+        """
+        video = cv2.VideoCapture(os.path.join("footage", filename))
 
     frame_n = 0
     smoother = AngleBuffer(1)
     while True:
         frame = None
         if CAMERA:
-            frame = video.read()
-            frame = applyIPT(frame)
+            frame, thread_frame_number = video.read()
+            frame = applyIPT(frame, MAPPING, TRANSLATION, CROP)
         else:
-            print("Loaded video file")
             retval, frame = video.read()
             if not retval:
                 pass
@@ -53,31 +58,28 @@ def test_model(model_name, COLOR_LOOKUP):
         w = 300
         h = 300
         frame = cv2.resize(frame, (w, h))
-    
-        # preprocess
-        edges = get_edges(frame)
-        edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
-        frame = edges & frame
+        frame = frame[0:int(h/2), 0:w]
+        frame = cv2.resize(frame, (w, h))
+        original = np.copy(frame)
 
+        # preprocess
+        edges = get_edges(frame, True)
+        edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
+        # frame = edges & frame
+
+        full_ynew = mask_lookup(frame, color_table)
+        mask_image = show_masks(full_ynew, frame, "full", w, h)
+
+        horizontal1 = np.concatenate((original, mask_image), axis=1)
+        horizontal2 = np.concatenate((edges, frame), axis=1)
+        total = np.concatenate((horizontal1, horizontal2), axis=0)
+
+        cv2.imshow("debug", total)
 
         # classify
-        other_ynew = mask_lookup(frame, COLOR_LOOKUP)
+        other_ynew = mask_lookup(frame, color_table)
 
-        try:
-            angle,speed = plan_steering(other_ynew, frame)
-        except:
-            angle = 0
-            speed = 94
-        smoother.add_new(angle)
-        angle = smoother.get_angle()
-        if go == 95:
-            go == 96
-        else:
-            go == 95
-        if SER:
-            SendSpeed(SER, int(angle), go)
-
-        frame_n += 1
+        angle,speed = plan_steering(other_ynew, frame, True)
 
     print("fin")
 
@@ -94,21 +96,29 @@ if __name__ == "__main__":
     except:
         SER = None
 
-    # load the model
-    """
-    model_file_path = os.path.join("trained_models", "Gaussian", "model.sav")
-    model_file = open(model_file_path, "rb")
-    model = pickle.load(model_file)
-    """
 
-    lookup_file = open("./LOOKUP.pkl", 'rb')
     ipm_file = open('../IPMtest/source/homographyMatrix.p', 'rb')
     trans_file = open('../IPMtest/source/Translation.p', 'rb')
     crop_file = open('../IPMtest/source/Crop.p', 'rb')
-    COLOR_LOOKUP = pickle.load(lookup_file)
     MAPPING = pickle.load(ipm_file)
     TRANSLATION = pickle.load(trans_file)
     CROP = pickle.load(crop_file)
 
-    test_model("Gaussian", COLOR_LOOKUP)
+    print("Data Foldername: ")
+    video_filename = choose_file("footage")
+    video_file_path = os.path.join("footage", video_filename)
+    video_name = os.path.splitext(video_filename)[0]
+    classifier = input("Classifier to test: ")
+    potential_lookup = os.path.join("trained_models", video_name, classifier+"_lookup.sav")
+    exists = os.path.isfile(potential_lookup)
+    
+    if exists:
+        print("Using existing classifier")
+    else:
+        collect_points(video_filename)
+        model = train_classifier(video_name, classifier)
+        create_lookup(classifier, video_name, model)
 
+    lookup_file = open(potential_lookup, "rb")
+    COLOR_LOOKUP = pickle.load(lookup_file)
+    test_model(COLOR_LOOKUP, video_filename)

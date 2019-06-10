@@ -2,8 +2,7 @@ from threading import Thread
 
 import cv2
 import numpy as np
-
-from nav import SHOW_CAMERA
+import pickle
 
 class WebcamVideoStream:
     """ 
@@ -11,10 +10,11 @@ class WebcamVideoStream:
     :param src: An integer specifying which camera we read from
     """
 
-    def __init__(self, src = 0):
+    def __init__(self, src=0):
         self.stream = cv2.VideoCapture(src)
         (self.grabbed, self.frame) = self.stream.read()
         self.stopped = False
+        self.frame_number = 0
 
     def start(self):
         Thread(target=self.update, args=()).start()
@@ -26,28 +26,29 @@ class WebcamVideoStream:
                 return
 
             (self.grabbed, self.frame) = self.stream.read()
+            self.frame_number += 1
 
     def read(self):
-        return self.frame
+        return self.frame, self.frame_number
 
     def stop(self):
         self.stopped = True
 
-def applyIPT(image):
+def applyIPT(image, mapping, translation, crop):
     sliderMax = 1000
     rows = image.shape[0]
     cols = image.shape[1]
-    image = cv2.warpPerspective(image, MAPPING, (int(4*image.shape[1]), 4*image.shape[0]))
-    X, Y, Theta = TRANSLATION
+    image = cv2.warpPerspective(image, mapping, (int(4*image.shape[1]), 4*image.shape[0]))
+    X, Y, Theta = translation
     M = np.float32([[1,0,X-int(sliderMax/2)],[0,1,Y-int(sliderMax/2)]])
     image = cv2.warpAffine(image, M, (cols, rows))
     M = cv2.getRotationMatrix2D((cols/2, rows/2), Theta-90,1)
     image = cv2.warpAffine(image, M, (cols, rows))
-    xB, xE, yB, yE = CROP
+    xB, xE, yB, yE = crop
     image = image[yB:yE,xB:xE]
     return image
 
-def mask_lookup(image, COLOR_LOOOKUP):
+def mask_lookup(image, color_table):
     """
     Use a lookup table to see if there
 
@@ -69,14 +70,17 @@ def mask_lookup(image, COLOR_LOOOKUP):
     Sat = Xnew[:, 1]
 
     Index = Hue + 256 * Sat
-    result = np.take(COLOR_LOOKUP, Index)
+    result = np.take(color_table, Index)
     return result
 
-def get_edges(frame):
+def get_edges(frame, show_debug):
     dimensions = frame.shape
+    prefilter = np.copy(frame)
+    frame = cv2.bilateralFilter(frame, 9, 75, 75)
+    side_by_side = np.concatenate((prefilter, frame), axis=1)
     edges = cv2.Canny(frame, 100, 250)
-    if SHOW_CAMERA:
-        cv2.imshow("canny", edges)
+    if show_debug:
+        cv2.imshow("canny", side_by_side)
         cv2.waitKey(1)
     return edges
 

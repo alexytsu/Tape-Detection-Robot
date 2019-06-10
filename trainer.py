@@ -13,7 +13,9 @@ from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.gaussian_process.kernels import RBF
 from sklearn.neighbors import KNeighborsClassifier
 
-def train_classifier(data_folder):
+from utility import choose_file
+
+def train_classifier(data_folder, classifier_name):
 
     blue_raw = os.path.join("training_data", data_folder, "blue.csv")
     Blue = pd.read_csv(blue_raw)
@@ -46,28 +48,54 @@ def train_classifier(data_folder):
         y.append(4)
 
     # plt.scatter()
-    classifier = AdaBoostClassifier(n_estimators=10, learning_rate=1) 
-    # classifier = GaussianNB()
+    if classifier_name == "adaboost":
+        classifier = AdaBoostClassifier(n_estimators=10, learning_rate=1) 
+    elif classifier_name == "gaussian":
+        classifier = GaussianNB()
     # classifier = GaussianProcessClassifier(1.0 * RBF(1.0))
-    # classifier = KNeighborsClassifier(3)
+    elif classifier_name == "kneighbors":
+        classifier = KNeighborsClassifier(3)
     # classifier = RandomForestClassifier(max_depth=5, n_estimators=5, max_features=1)
+    else:
+        print("NO VALID CLASSIFIER SELECTED")
+        exit()
+
     model = classifier.fit(X,y)
 
-    COLOR_LOOKUP = np.zeros((256,256), dtype= np.uint8)
+    try:
+        os.mkdir(os.path.join("trained_models", data_folder))
+    except FileExistsError:
+        pass
 
+    filepath = os.path.join("trained_models", data_folder, "model.sav")
+    pickle.dump(model, open(filepath,'wb'))
+    return model
+
+
+def create_lookup(classifier, data, model, path=None):
+    try:
+        os.mkdir(os.path.join("trained_models", data))
+    except FileExistsError:
+        pass
+    saved_path = os.path.join("trained_models", data, classifier+"_lookup.sav")
+    COLOR_LOOKUP = np.zeros((256,256), dtype= np.uint8)
     for h in range(256):
         for s in range(256):
             answers = ["NONE", "BLUE", "RED", "YELLOW", "OTHER"]
             result =  model.predict([np.array([h,s])])[0]
             if result == 1 or result == 3:
                 print(f"Storing H:{h} with S:{s} as {answers[result]} {result}")
-            COLOR_LOOKUP[s][h] = int(result)
+            COLOR_LOOKUP[h][h] = int(result)
     
-    pickle.dump(COLOR_LOOKUP, open("LOOKUP.pkl","wb"))
-
-    filepath = os.path.join("trained_models", "Gaussian", "model.sav")
-    pickle.dump(model, open(filepath,'wb'))
+    if not path is None:
+        file = open(path, "wb")
+        pickle.dump(COLOR_LOOKUP, file)
+    
+    file = open(saved_path, "wb")
+    pickle.dump(COLOR_LOOKUP, file)
 
 if __name__ == "__main__":
-    data = input("Foldername: ")
-    train_classifier(data)
+    data = choose_file("training_data")
+    classifier = input("Classifier: ")
+    model = train_classifier(data, classifier)
+    create_lookup(classifier, data, model, os.path.join("LOOKUP.pkl"))

@@ -11,3 +11,4 @@ build/
 *.o
 *.so
 fr.cpp
+LOOKUP.pkl

@@ -5,10 +5,10 @@ __pycache__
 footage/
 images/
 training_data/
+trained_models/
 *.swp
 
 build/
 *.o
 *.so
 fr.cpp
-LOOKUP.pkl

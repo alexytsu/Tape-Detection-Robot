@@ -21,6 +21,7 @@ SER = None
 MAPPING = None
 TRANSLATION = None
 CROP = None
+COLOR_LOOKUP = None
 
 go = 95
 
@@ -81,21 +82,49 @@ def mask_image(image, model, frame_n):
     result = model.predict(Xnew)
     return result
 
+def mask_lookup(image):
+    hue_and_sat = image[:,:,0:2]
+
+    hsvImage = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+    H = hsvImage[:, :, 0]
+    S = hsvImage[:, :, 1]
+
+    # find how long the one dimensional form needs to be
+    one_dim_length = hsvImage.shape[0] * hsvImage.shape[1]
+
+    # now spread out the image [HSV]
+    Xnew = np.reshape(hsvImage, (one_dim_length, 3))
+
+    # only take H and S
+    Hue = Xnew[:, 0]
+    Sat = Xnew[:, 1]
+
+    Index = Hue + 256 * Sat
+    result = np.take(COLOR_LOOKUP, Index)
+    return result
+
+def show_canny(frame):
+    dimensions = frame.shape
+    downsize = cv2.resize(frame, (0,0), fx=0.1, fy=0.1)
+    edges = cv2.Canny(downsize, 40, 250)
+    edges = cv2.resize(edges, (dimensions[1], dimensions[0]))
+    cv2.imshow("hello", edges)
+    return edges
+
 
 def test_model(model_name):
-    # load the model
-    model_file_path = os.path.join("trained_models", model_name, "model.sav")
-    model_file = open(model_file_path, "rb")
-    model = pickle.load(model_file)
+
+
+
 
     # load the video file
     if CAMERA:
         video = WebcamVideoStream(src=0).start()
 
     else:
-        video_file_path = os.path.join("footage", choose_file())
-        video = cv2.VideoCapture(video_file_path)
-        # video = cv2.VideoCapture("./footage/marsfield_02.mkv")
+        # video_file_path = os.path.join("footage", choose_file())
+        # video = cv2.VideoCapture(video_file_path)
+        video = cv2.VideoCapture("./footage/MCIC_variable.mkv")
 
     frame_n = 0
     smoother = AngleBuffer(1)
@@ -109,19 +138,30 @@ def test_model(model_name):
             if not retval:
                 pass
     
+        # preprocess
+        edges = show_canny(frame)
+        edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
+        frame = edges & frame
 
+        # resize
         w = 300
         h = 300
         frame = cv2.resize(frame, (w, h))
-        ynew = mask_image(frame, model, frame_n)
+
+        # classify
+        other_ynew = mask_lookup(frame)
+        # ynew = mask_image(frame, model, frame_n)
+
+        # show_masks(other_ynew, frame, "lookup")
+        # show_masks(ynew, frame, "predict")
+
         try:
-            angle,speed = plan_steering(ynew, frame)
+            angle,speed = plan_steering(other_ynew, frame)
         except:
             angle = 0
             speed = 94
         smoother.add_new(angle)
         angle = smoother.get_angle()
-        print("SeRIAL", SER, "angle", angle)
         if go == 95:
             go == 96
         else:
@@ -145,6 +185,22 @@ if __name__ == "__main__":
         SER = getSerialPort()
     except:
         SER = None
+
+    # load the model
+    model_file_path = os.path.join("trained_models", "Gaussian", "model.sav")
+    model_file = open(model_file_path, "rb")
+    model = pickle.load(model_file)
+
+    COLOR_LOOKUP = np.zeros((256,256), dtype= np.uint8)
+
+    for h in range(256):
+        for s in range(256):
+            answers = ["NONE", "BLUE", "RED", "YELLOW", "OTHER"]
+            result =  model.predict([np.array([h,s])])[0]
+            if result == 1 or result == 3:
+                print(f"Storing H:{h} with S:{s} as {answers[result]} {result}")
+            COLOR_LOOKUP[s][h] = int(result)
+
 
     try:
         ipm_file = open('../IPMtest/source/homographyMatrix.p', 'rb')

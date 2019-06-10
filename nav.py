@@ -1,4 +1,5 @@
 import math
+import pdb
 
 import cv2
 import numpy as np
@@ -6,7 +7,7 @@ import numpy as np
 from fr import PyFrame
 from helper import writeLineAttributes
 
-SHOW_CAMERA = True
+SHOW_CAMERA = False
 CAMERA = True
 
 class AngleBuffer():
@@ -63,12 +64,13 @@ def analyseLineScatter(image, pointList, height, width):
     try:
         x_avg = xy_sum / y_sum
     except:
+        print("FAILED TO FIND X_CENTROID")
         pass
 
     houghLines = []
 
     # LOWER NUMBER === MOREEE SPAGHETTIIII
-    SPAGHETTI = 18
+    SPAGHETTI = 20
 
     lines = cv2.HoughLines(blank_image, 4, np.pi / 50, SPAGHETTI, None, 0, 0)
     if lines is not None:
@@ -98,6 +100,7 @@ def analyseLineScatter(image, pointList, height, width):
         angle = int(angle)
         return angle, int(x_avg - width/2)
     except Exception as e:
+        print("FAILED TO GET ANGLES")
         return None, int(x_avg - width/2)
 
 
@@ -163,16 +166,19 @@ def plan_steering(classified, image):
         steering_angle = -5
 
 
-    xdiff = int(math.tan(math.radians(angle)) * midy)
-    bottomPoint = (midx, height)
-    navPoint = (midx + xdiff, midy)
-    cv2.line(image, bottomPoint, navPoint, (0, 0, 0), 1, cv2.LINE_AA)
-    cv2.line(image, (midx, midy), (midx + offset, midy), (100, 100, 100), 1, cv2.LINE_AA)
+    try:
+        xdiff = int(math.tan(math.radians(angle)) * midy)
+        bottomPoint = (midx, height)
+        navPoint = (midx + xdiff, midy)
+        cv2.line(image, bottomPoint, navPoint, (0, 0, 0), 1, cv2.LINE_AA)
+        cv2.line(image, (midx, midy), (midx + offset, midy), (100, 100, 100), 1, cv2.LINE_AA)
 
-    xdiff = int(math.tan(math.radians(steering_angle)) * midy)
-    bottomPoint = (midx, height)
-    navPoint = (midx + xdiff, midy)
-    cv2.line(image, bottomPoint, navPoint, (0, 0, 0), 3, cv2.LINE_AA)
+        xdiff = int(math.tan(math.radians(steering_angle)) * midy)
+        bottomPoint = (midx, he67ggight)
+        navPoint = (midx + xdiff, midy)
+        cv2.line(image, bottomPoint, navPoint, (0, 0, 0), 3, cv2.LINE_AA)
+    except:
+        print("Failed to draw lines")
 
     if SHOW_CAMERA:
         cv2.imshow("res", cv2.resize(image, (1280, 720)))

@@ -15,7 +15,6 @@ import pdb
 
 def shit_the_bed():
     print("UWUUUUU FUCKY WUCKY")
-    pdb.set_trace()
 
 
 # 9 Yellows, 9 blues:

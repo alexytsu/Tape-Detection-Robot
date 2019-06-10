@@ -105,9 +105,7 @@ def mask_lookup(image):
 
 def show_canny(frame):
     dimensions = frame.shape
-    downsize = cv2.resize(frame, (0,0), fx=0.1, fy=0.1)
-    edges = cv2.Canny(downsize, 40, 250)
-    edges = cv2.resize(edges, (dimensions[1], dimensions[0]))
+    edges = cv2.Canny(frame, 100, 250)
     cv2.imshow("hello", edges)
     return edges
 
@@ -122,9 +120,9 @@ def test_model(model_name):
         video = WebcamVideoStream(src=0).start()
 
     else:
-        # video_file_path = os.path.join("footage", choose_file())
-        # video = cv2.VideoCapture(video_file_path)
-        video = cv2.VideoCapture("./footage/MCIC_variable.mkv")
+        video_file_path = os.path.join("footage", choose_file())
+        video = cv2.VideoCapture(video_file_path)
+        # video = cv2.VideoCapture("./footage/MCIC_variable.mkv")
 
     frame_n = 0
     smoother = AngleBuffer(1)
@@ -138,15 +136,16 @@ def test_model(model_name):
             if not retval:
                 pass
     
-        # preprocess
         edges = show_canny(frame)
         edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
         frame = edges & frame
 
+        """
         # resize
         w = 300
         h = 300
         frame = cv2.resize(frame, (w, h))
+        """
 
         # classify
         other_ynew = mask_lookup(frame)
@@ -191,16 +190,8 @@ if __name__ == "__main__":
     model_file = open(model_file_path, "rb")
     model = pickle.load(model_file)
 
-    COLOR_LOOKUP = np.zeros((256,256), dtype= np.uint8)
-
-    for h in range(256):
-        for s in range(256):
-            answers = ["NONE", "BLUE", "RED", "YELLOW", "OTHER"]
-            result =  model.predict([np.array([h,s])])[0]
-            if result == 1 or result == 3:
-                print(f"Storing H:{h} with S:{s} as {answers[result]} {result}")
-            COLOR_LOOKUP[s][h] = int(result)
-
+    lookup_file = open("./LOOKUP.pkl", 'rb')
+    COLOR_LOOKUP = pickle.load(lookup_file)
 
     try:
         ipm_file = open('../IPMtest/source/homographyMatrix.p', 'rb')

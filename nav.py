@@ -7,7 +7,7 @@ import numpy as np
 from fr import PyFrame
 from helper import writeLineAttributes
 
-SHOW_CAMERA = False
+SHOW_CAMERA = True
 CAMERA = True
 
 class AngleBuffer():
@@ -174,9 +174,9 @@ def plan_steering(classified, image):
         cv2.line(image, (midx, midy), (midx + offset, midy), (100, 100, 100), 1, cv2.LINE_AA)
 
         xdiff = int(math.tan(math.radians(steering_angle)) * midy)
-        bottomPoint = (midx, he67ggight)
+        bottomPoint = (midx, height)
         navPoint = (midx + xdiff, midy)
-        cv2.line(image, bottomPoint, navPoint, (0, 0, 0), 3, cv2.LINE_AA)
+        cv2.line(image, bottomPoint, navPoint, (255, 255, 255), 3, cv2.LINE_AA)
     except:
         print("Failed to draw lines")
 

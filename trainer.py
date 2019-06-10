@@ -53,6 +53,18 @@ def train_classifier(data_folder):
     # classifier = RandomForestClassifier(max_depth=5, n_estimators=5, max_features=1)
     model = classifier.fit(X,y)
 
+    COLOR_LOOKUP = np.zeros((256,256), dtype= np.uint8)
+
+    for h in range(256):
+        for s in range(256):
+            answers = ["NONE", "BLUE", "RED", "YELLOW", "OTHER"]
+            result =  model.predict([np.array([h,s])])[0]
+            if result == 1 or result == 3:
+                print(f"Storing H:{h} with S:{s} as {answers[result]} {result}")
+            COLOR_LOOKUP[s][h] = int(result)
+    
+    pickle.dump(COLOR_LOOKUP, open("LOOKUP.pkl","wb"))
+
     filepath = os.path.join("trained_models", "Gaussian", "model.sav")
     pickle.dump(model, open(filepath,'wb'))
 

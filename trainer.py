@@ -46,8 +46,8 @@ def train_classifier(data_folder):
         y.append(4)
 
     # plt.scatter()
-    # classifier = AdaBoostClassifier(n_estimators=3, learning_rate=1) 
-    classifier = GaussianNB()
+    classifier = AdaBoostClassifier(n_estimators=10, learning_rate=1) 
+    # classifier = GaussianNB()
     # classifier = GaussianProcessClassifier(1.0 * RBF(1.0))
     # classifier = KNeighborsClassifier(3)
     # classifier = RandomForestClassifier(max_depth=5, n_estimators=5, max_features=1)

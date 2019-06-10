@@ -107,13 +107,11 @@ def show_canny(frame):
     dimensions = frame.shape
     edges = cv2.Canny(frame, 100, 250)
     cv2.imshow("hello", edges)
+    cv2.waitKey(1)
     return edges
 
 
 def test_model(model_name):
-
-
-
 
     # load the video file
     if CAMERA:
@@ -135,24 +133,20 @@ def test_model(model_name):
             retval, frame = video.read()
             if not retval:
                 pass
-    
-        edges = show_canny(frame)
-        edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
-        frame = edges & frame
-
-        """
+                
         # resize
         w = 300
         h = 300
         frame = cv2.resize(frame, (w, h))
-        """
+    
+        # preprocess
+        edges = show_canny(frame)
+        edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
+        frame = edges & frame
+
 
         # classify
         other_ynew = mask_lookup(frame)
-        # ynew = mask_image(frame, model, frame_n)
-
-        # show_masks(other_ynew, frame, "lookup")
-        # show_masks(ynew, frame, "predict")
 
         try:
             angle,speed = plan_steering(other_ynew, frame)
@@ -186,9 +180,11 @@ if __name__ == "__main__":
         SER = None
 
     # load the model
+    """
     model_file_path = os.path.join("trained_models", "Gaussian", "model.sav")
     model_file = open(model_file_path, "rb")
     model = pickle.load(model_file)
+    """
 
     lookup_file = open("./LOOKUP.pkl", 'rb')
     COLOR_LOOKUP = pickle.load(lookup_file)

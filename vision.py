@@ -40,8 +40,8 @@ class WebcamVideoStream:
 
 def applyIPT(image, mapping, translation, crop):
     sliderMax = 1000
-    rows = image.shape[0]
-    cols = image.shape[1]
+    rows = 720
+    cols = 480
     image = cv2.warpPerspective(image, mapping, (int(4*image.shape[1]), 4*image.shape[0]))
     X, Y, Theta = translation
     M = np.float32([[1,0,X-int(sliderMax/2)],[0,1,Y-int(sliderMax/2)]])

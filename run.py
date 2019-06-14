@@ -15,7 +15,7 @@ def run(video, arduino, color_lookup, mapping, translation, crop):
     while True:
         start_time = time.time()
         frame, frame_n = video.read()
-        frame = cv2.resize(frame, (240, 320), interpolation = cv2.INTER_AREA)
+        frame = cv2.resize(frame, (320, 240), interpolation = cv2.INTER_AREA)
         tape_frame = applyIPT(frame, mapping, translation, crop)
         
         # resize the navigation frame
@@ -26,9 +26,11 @@ def run(video, arduino, color_lookup, mapping, translation, crop):
         """
     
         # preprocess
+        """
         tape_edges = get_edges(tape_frame, ARGS.debug_camera) 
         tape_edges = cv2.cvtColor(tape_edges, cv2.COLOR_GRAY2BGR)
         tape_frame = tape_edges & tape_frame
+        """
 
         # classify
         colors = mask_lookup(tape_frame, color_lookup)
@@ -61,7 +63,11 @@ if __name__ == "__main__":
     ARGS = args
 
     # Initialise the necessary hardware and AI
-    SER = getSerialPort() # open port to Arduino controller
+    SER = None
+    try:
+        SER = getSerialPort() # open port to Arduino controller
+    except:
+        SER = None
     COLOR_LOOKUP = get_color_lookup() # load the trained color table
     MAPPING, TRANSLATION, CROP = get_perspective_warp() # load the camera transforms
     STREAM = WebcamVideoStream(ARGS.camera).start()

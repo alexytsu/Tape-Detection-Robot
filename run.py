@@ -60,10 +60,10 @@ if __name__ == "__main__":
     ARGS = args
 
     # Initialise the necessary hardware and AI
-    # SER = getSerialPort() # open port to Arduino controller
+    SER = getSerialPort() # open port to Arduino controller
     COLOR_LOOKUP = get_color_lookup() # load the trained color table
     MAPPING, TRANSLATION, CROP = get_perspective_warp() # load the camera transforms
     STREAM = WebcamVideoStream(ARGS.camera).start()
-    run(STREAM, None, COLOR_LOOKUP, MAPPING, TRANSLATION, CROP)
+    run(STREAM, SER, COLOR_LOOKUP, MAPPING, TRANSLATION, CROP)
     # Thread(target=run, args=(STREAM, None, COLOR_LOOKUP, MAPPING, TRANSLATION, CROP,)).start()
 

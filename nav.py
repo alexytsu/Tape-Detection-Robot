@@ -7,6 +7,84 @@ import numpy as np
 from fr import PyFrame
 from helper import writeLineAttributes
 
+def plan_steering(classified, image, show_camera):
+    height = image.shape[0]
+    width = image.shape[1]
+
+    imagified = np.reshape(classified, (height, width))
+    image_canonical = np.copy(imagified)
+
+    c_array = imagified / 5
+    cFrame = PyFrame(c_array)
+
+    cFrame.getTapePoints()
+
+    pointList = cFrame.getMidPoints()
+    if show_camera:
+        plot_pointlist(image, pointList, (50,255,50))
+    midAngle, midOffset = analyseLineScatter(image, pointList, height, width)
+
+    pointList = cFrame.getDarkPoints()
+    if show_camera:
+        plot_pointlist(image, pointList, (255,50,50))
+    blueAngle, blueOffset = analyseLineScatter(image, pointList, height, width)
+
+    pointList = cFrame.getLightPoints()
+    if show_camera:
+        plot_pointlist(image, pointList, (0, 100, 100))
+    yellowAngle, yellowOffset = analyseLineScatter(image, pointList, height, width)
+
+    angle = 0
+    offset = 0
+    steering_angle = 0
+
+    # draw the angle
+    midx = int(width/2)
+    midy = int(height/2)
+
+    speed = 95
+
+    if midAngle:
+        angle = int(midAngle)
+        offset = midOffset
+        offset_angle = int(math.degrees(math.atan2(offset, midy)))
+        steering_angle = int((offset_angle * 7.5 + angle * 2.5) / 10)
+    elif blueAngle and yellowAngle:
+        angle = int((blueAngle + yellowAngle)/2)
+        offset = int((blueOffset + yellowOffset)/2)
+        steering_angle = angle
+    elif blueAngle:
+        angle = int(blueAngle)
+        offset = blueOffset
+        steering_angle = angle * 2 + 8
+    elif yellowAngle:
+        angle = int(yellowAngle)
+        offset = yellowOffset
+        steering_angle = angle * 2 - 8
+    else:
+        steering_angle = -3
+
+    if show_camera:
+        try:
+            xdiff = int(math.tan(math.radians(angle)) * midy)
+            bottomPoint = (midx, height)
+            navPoint = (midx + xdiff, midy)
+            cv2.line(image, bottomPoint, navPoint, (0, 0, 0), 1, cv2.LINE_AA)
+            cv2.line(image, (midx, midy), (midx + offset, midy), (100, 100, 100), 1, cv2.LINE_AA)
+
+            xdiff = int(math.tan(math.radians(steering_angle)) * midy)
+            bottomPoint = (midx, height)
+            navPoint = (midx + xdiff, midy)
+            cv2.line(image, bottomPoint, navPoint, (255, 255, 255), 3, cv2.LINE_AA)
+        except:
+            print("failed to draw some lines")
+            pass
+
+        cv2.imshow("res", cv2.resize(image, (1280, 720)))
+        if cv2.waitKey(1) & 0xFF == ord("q"):
+            exit()
+    return steering_angle, speed
+
 class AngleBuffer():
     def __init__(self, length):
         self.length = length
@@ -66,7 +144,7 @@ def analyseLineScatter(image, pointList, height, width):
     houghLines = []
 
     # LOWER NUMBER === MOREEE SPAGHETTIIII
-    SPAGHETTI = 15
+    SPAGHETTI = 10
 
     lines = cv2.HoughLines(blank_image, 4, np.pi / 50, SPAGHETTI, None, 0, 0)
     if lines is not None:
@@ -108,84 +186,3 @@ def plot_pointlist(image, pointList, color):
             print(e)
 
 
-def plan_steering(classified, image, show_camera):
-    height = image.shape[0]
-    width = image.shape[1]
-
-    imagified = np.reshape(classified, (height, width))
-    image_canonical = np.copy(imagified)
-
-    c_array = imagified / 5
-    cFrame = PyFrame(c_array)
-
-    cFrame.getTapePoints()
-
-    pointList = cFrame.getMidPoints()
-    if show_camera:
-        plot_pointlist(image, pointList, (50,255,50))
-    midAngle, midOffset = analyseLineScatter(image, pointList, height, width)
-
-    pointList = cFrame.getDarkPoints()
-    if show_camera:
-        plot_pointlist(image, pointList, (255,50,50))
-    blueAngle, blueOffset = analyseLineScatter(image, pointList, height, width)
-
-    pointList = cFrame.getLightPoints()
-    if show_camera:
-        plot_pointlist(image, pointList, (0, 100, 100))
-    yellowAngle, yellowOffset = analyseLineScatter(image, pointList, height, width)
-
-    angle = 0
-    offset = 0
-    steering_angle = 0
-
-    # draw the angle
-    midx = int(width/2)
-    midy = int(height/2)
-
-    speed = 95
-
-    if midAngle:
-        angle = int(midAngle)
-        offset = midOffset
-        offset_angle = int(math.degrees(math.atan2(offset, midy)))
-        steering_angle = int(int((offset_angle * 7.5 + angle * 2.5) / 10)/2)
-    elif blueAngle and yellowAngle:
-        angle = int((blueAngle + yellowAngle)/2)
-        offset = int((blueOffset + yellowOffset)/2)
-        steering_angle = angle
-    elif blueAngle:
-        angle = int(blueAngle)
-        offset = blueOffset
-        steering_angle = angle + 8
-    elif yellowAngle:
-        angle = int(yellowAngle)
-        offset = yellowOffset
-        steering_angle = -50
-    else:
-        steering_angle = -5
-
-    red = (imagified==4).astype(int)
-    contours, _ = cv2.findContours(red, cv2.RETR_FLOODFILL, cv2.CHAIN_APPROX_SIMPLE)
-    cv2.drawContours(image, contours, -1, (255,255,255), 0)
-
-    if show_camera:
-        try:
-            xdiff = int(math.tan(math.radians(angle)) * midy)
-            bottomPoint = (midx, height)
-            navPoint = (midx + xdiff, midy)
-            cv2.line(image, bottomPoint, navPoint, (0, 0, 0), 1, cv2.LINE_AA)
-            cv2.line(image, (midx, midy), (midx + offset, midy), (100, 100, 100), 1, cv2.LINE_AA)
-
-            xdiff = int(math.tan(math.radians(steering_angle)) * midy)
-            bottomPoint = (midx, height)
-            navPoint = (midx + xdiff, midy)
-            cv2.line(image, bottomPoint, navPoint, (255, 255, 255), 3, cv2.LINE_AA)
-        except:
-            print("failed to draw some lines")
-            pass
-
-        cv2.imshow("res", cv2.resize(image, (1280, 720)))
-        if cv2.waitKey(1) & 0xFF == ord("q"):
-            exit()
-    return steering_angle, speed

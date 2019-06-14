@@ -15,12 +15,8 @@ def run(video, arduino, color_lookup, mapping, translation, crop):
     while True:
         start_time = time.time()
         frame, frame_n = video.read()
-        print(0)
-        frame = cv2.resize(frame, (320, 240), interpolation = cv2.INTER_AREA)
-        print(1)
+        frame = cv2.resize(frame, (240, 320), interpolation = cv2.INTER_AREA)
         tape_frame = applyIPT(frame, mapping, translation, crop)
-        print(tape_frame)
-        print(2)
         
         # resize the navigation frame
         """

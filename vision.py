@@ -48,10 +48,8 @@ def applyIPT(image, mapping, translation, crop):
     image = cv2.warpAffine(image, M, (cols, rows))
     M = cv2.getRotationMatrix2D((cols/2, rows/2), Theta-90,1)
     image = cv2.warpAffine(image, M, (cols, rows))
-    """
     xB, xE, yB, yE = crop
     image = image[yB:yE,xB:xE]
-    """
     return image
 
 def mask_lookup(image, color_table):

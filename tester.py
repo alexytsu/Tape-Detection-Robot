@@ -55,8 +55,8 @@ def test_model(color_table, filename=None):
                 
 
         # resize
-        w = 300
-        h = 300
+        w = 200
+        h = 200
         frame = cv2.resize(frame, (w, h))
         frame = frame[0:int(h/2), 0:w]
         frame = cv2.resize(frame, (w, h))

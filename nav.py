@@ -66,7 +66,7 @@ def analyseLineScatter(image, pointList, height, width):
     houghLines = []
 
     # LOWER NUMBER === MOREEE SPAGHETTIIII
-    SPAGHETTI = 20
+    SPAGHETTI = 15
 
     lines = cv2.HoughLines(blank_image, 4, np.pi / 50, SPAGHETTI, None, 0, 0)
     if lines is not None:
@@ -113,6 +113,8 @@ def plan_steering(classified, image, show_camera):
     width = image.shape[1]
 
     imagified = np.reshape(classified, (height, width))
+    image_canonical = np.copy(imagified)
+
     c_array = imagified / 5
     cFrame = PyFrame(c_array)
 
@@ -163,6 +165,9 @@ def plan_steering(classified, image, show_camera):
     else:
         steering_angle = -5
 
+    red = (imagified==4).astype(int)
+    contours, _ = cv2.findContours(red, cv2.RETR_FLOODFILL, cv2.CHAIN_APPROX_SIMPLE)
+    cv2.drawContours(image, contours, -1, (255,255,255), 0)
 
     if show_camera:
         try:

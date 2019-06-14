@@ -12,6 +12,7 @@ class WebcamVideoStream:
 
     def __init__(self, src=0):
         self.stream = cv2.VideoCapture(src)
+        self.stream.set(cv2.CAP_PROP_FPS, 61)
         (self.grabbed, self.frame) = self.stream.read()
         self.stopped = False
         self.frame_number = 0
@@ -80,7 +81,7 @@ def get_edges(frame, show_debug):
     side_by_side = np.concatenate((prefilter, frame), axis=1)
     edges = cv2.Canny(frame, 100, 250)
     if show_debug:
-        cv2.imshow("canny", side_by_side)
+        cv2.imshow("canny", cv2.resize(side_by_side, (1000,500)))
         cv2.waitKey(1)
     return edges
 

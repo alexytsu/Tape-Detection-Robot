@@ -88,7 +88,7 @@ def collect_points(filename=None):
     try:
         os.mkdir(os.path.join("training_data", video_name))
     except FileExistsError:
-        response =  input("Data already exists. Would you like to retrain? (y/n)")
+        response =  input("Data already exists. Would you like to repick? (y/n)")
         if response == 'y':
             pass
         else:

@@ -18,7 +18,7 @@ def show_masks(ynew, image, name, w, h):
     for loc in roi:
         row = int(loc / image.shape[1])
         col = loc % image.shape[1]
-        image[row][col] = (0, 0, 0)
+        image[row][col] = (50, 50, 200)
 
     roi = np.where(ynew == 4)[0]
     for loc in roi:

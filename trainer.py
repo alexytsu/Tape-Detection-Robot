@@ -47,20 +47,24 @@ def train_classifier(data_folder, classifier_name):
         X.append([x.H, x.S])
         y.append(4)
 
+    # classifier = RandomForestClassifier(max_depth=5, n_estimators=5, max_features=1)
+
     # plt.scatter()
     if classifier_name == "adaboost":
-        classifier = AdaBoostClassifier(n_estimators=10, learning_rate=1) 
+        classifier = AdaBoostClassifier(n_estimators=7, learning_rate=7) 
     elif classifier_name == "gaussian":
         classifier = GaussianNB()
-    # classifier = GaussianProcessClassifier(1.0 * RBF(1.0))
     elif classifier_name == "kneighbors":
         classifier = KNeighborsClassifier(3)
-    # classifier = RandomForestClassifier(max_depth=5, n_estimators=5, max_features=1)
+    elif classifier_name == "bayes":
+        classifier = GaussianProcessClassifier(1.0 * RBF(1.0))
     else:
         print("NO VALID CLASSIFIER SELECTED")
         exit()
 
+    print("Selected ", classifier_name, " classifier")
     model = classifier.fit(X,y)
+    print("Fitting finished")
 
     try:
         os.mkdir(os.path.join("trained_models", data_folder))
@@ -73,6 +77,7 @@ def train_classifier(data_folder, classifier_name):
 
 
 def create_lookup(classifier, data, model, path=None):
+    print("Starting to create lookup!")
     try:
         os.mkdir(os.path.join("trained_models", data))
     except FileExistsError:
@@ -81,6 +86,7 @@ def create_lookup(classifier, data, model, path=None):
     COLOR_LOOKUP = np.zeros((256,256), dtype= np.uint8)
     for h in range(256):
         for s in range(256):
+            print(f"H:{h}, S:{s}")
             answers = ["NONE", "BLUE", "RED", "YELLOW", "OTHER"]
             result =  model.predict([np.array([h,s])])[0]
             if result == 1 or result == 3:
@@ -93,6 +99,7 @@ def create_lookup(classifier, data, model, path=None):
     
     file = open(saved_path, "wb")
     pickle.dump(COLOR_LOOKUP, file)
+    print("Finished creating lookup")
 
 if __name__ == "__main__":
     data = choose_file("training_data")

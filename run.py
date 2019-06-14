@@ -15,17 +15,20 @@ def run(video, arduino, color_lookup, mapping, translation, crop):
     while True:
         start_time = time.time()
         frame, frame_n = video.read()
-        tape_frame = applyIPT(frame, mapping, translation, crop)
+        # tape_frame = applyIPT(frame, mapping, translation, crop)
+        tape_frame = frame
         
         # resize the navigation frame
-        w = 150
-        h = 150
+        w = 200
+        h = 200
         tape_frame = cv2.resize(tape_frame, (w, h))
     
         # preprocess
+        """
         tape_edges = get_edges(tape_frame, ARGS.debug_camera) 
         tape_edges = cv2.cvtColor(tape_edges, cv2.COLOR_GRAY2BGR)
         tape_frame = tape_edges & tape_frame
+        """
 
         # classify
         colors = mask_lookup(tape_frame, color_lookup)
@@ -61,6 +64,6 @@ if __name__ == "__main__":
     COLOR_LOOKUP = get_color_lookup() # load the trained color table
     MAPPING, TRANSLATION, CROP = get_perspective_warp() # load the camera transforms
     STREAM = WebcamVideoStream(ARGS.camera).start()
-    # run(STREAM, None, COLOR_LOOKUP, MAPPING, TRANSLATION, CROP)
-    Thread(target=run, args=(STREAM, None, COLOR_LOOKUP, MAPPING, TRANSLATION, CROP,)).start()
+    run(STREAM, None, COLOR_LOOKUP, MAPPING, TRANSLATION, CROP)
+    # Thread(target=run, args=(STREAM, None, COLOR_LOOKUP, MAPPING, TRANSLATION, CROP,)).start()
 

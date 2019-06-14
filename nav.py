@@ -48,7 +48,7 @@ def plan_steering(classified, image, show_camera):
         angle = int(midAngle)
         offset = midOffset
         offset_angle = int(math.degrees(math.atan2(offset, midy)))
-        steering_angle = int((offset_angle * 7.5 + angle * 2.5) / 10)
+        steering_angle = int((offset_angle * 9 + angle * 1) / 10)
     elif blueAngle and yellowAngle:
         angle = int((blueAngle + yellowAngle)/2)
         offset = int((blueOffset + yellowOffset)/2)
@@ -56,11 +56,11 @@ def plan_steering(classified, image, show_camera):
     elif blueAngle:
         angle = int(blueAngle)
         offset = blueOffset
-        steering_angle = angle * 2 + 8
+        steering_angle = angle * 1.5 + 10
     elif yellowAngle:
         angle = int(yellowAngle)
         offset = yellowOffset
-        steering_angle = angle * 2 - 8
+        steering_angle = angle * 1.5 - 10
     else:
         steering_angle = -3
 
@@ -144,7 +144,7 @@ def analyseLineScatter(image, pointList, height, width):
     houghLines = []
 
     # LOWER NUMBER === MOREEE SPAGHETTIIII
-    SPAGHETTI = 10
+    SPAGHETTI = 15
 
     lines = cv2.HoughLines(blank_image, 4, np.pi / 50, SPAGHETTI, None, 0, 0)
     if lines is not None:

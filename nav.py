@@ -8,15 +8,41 @@ from fr import PyFrame
 from helper import writeLineAttributes
 
 def plan_steering(classified, image, show_camera):
+    """ Decides what angle and speed for the robot to move """
+
+    # get the dimensions of the image and reshape the colour mask
     height = image.shape[0]
     width = image.shape[1]
+
+    # calculate trig values
+    midx = int(width/2)
+    midy = int(height/2)
 
     imagified = np.reshape(classified, (height, width))
     image_canonical = np.copy(imagified)
 
-    c_array = imagified / 5
-    cFrame = PyFrame(c_array)
+    top_half = imagified[0:midy, : ]
+    bottom_half = imagified[midy:height, : ]
 
+    top_angle, top_speed = analyseSegment(top_half, "top", show_camera)
+    bottom_angle, bottom_speed = analyseSegment(bottom_half, "bottom_half", show_camera)
+
+    return bottom_angle, bottom_speed
+
+
+def analyseSegment(image, footage_name, show_camera):
+    # get the dimensions of the image and reshape the colour mask
+    height = image.shape[0]
+    width = image.shape[1]
+
+    # calculate trig values
+    midx = int(width/2)
+    midy = int(height/2)
+
+    # give the colored frame to Cython to extract lines
+    cFrame = PyFrame(image)
+
+    # classify all the necessary points
     cFrame.getTapePoints()
 
     pointList = cFrame.getMidPoints()
@@ -38,32 +64,34 @@ def plan_steering(classified, image, show_camera):
     offset = 0
     steering_angle = 0
 
-    # draw the angle
-    midx = int(width/2)
-    midy = int(height/2)
-
-    speed = 95
+    speed = 95 # default speed
+    errorBias = 10
 
     if midAngle:
+        # follow the middle of the lane
         angle = int(midAngle)
         offset = midOffset
         offset_angle = int(math.degrees(math.atan2(offset, midy)))
         steering_angle = int((offset_angle * 9 + angle * 1) / 10)
     elif blueAngle and yellowAngle:
+        # rotate and find a better midline
         angle = int((blueAngle + yellowAngle)/2)
         offset = int((blueOffset + yellowOffset)/2)
         steering_angle = angle
     elif blueAngle:
+        # only see blue tape
         angle = int(blueAngle)
         offset = blueOffset
-        steering_angle = angle * 1.5 + 10
+        steering_angle = angle * 1.5 + errorBias # shift away from the blue tape
     elif yellowAngle:
+        # only see yellow tape
         angle = int(yellowAngle)
         offset = yellowOffset
-        steering_angle = angle * 1.5 - 10
+        steering_angle = angle * 1.5 - errorBias # shift away from yellow tape
     else:
-        steering_angle = -3
+        steering_angle = 0 # hold the line
 
+    # plot all the spaghetti for debugging
     if show_camera:
         try:
             xdiff = int(math.tan(math.radians(angle)) * midy)
@@ -80,10 +108,12 @@ def plan_steering(classified, image, show_camera):
             print("failed to draw some lines")
             pass
 
-        cv2.imshow("res", cv2.resize(image, (1280, 720)))
+        cv2.imshow(footage_name, cv2.resize(image, (1280, 720)))
         if cv2.waitKey(1) & 0xFF == ord("q"):
             exit()
+
     return steering_angle, speed
+
 
 class AngleBuffer():
     def __init__(self, length):
@@ -97,17 +127,6 @@ class AngleBuffer():
 
     def get_angle(self):
         return int(sum(self.buffer) / self.length)
-
-def gradientIntercept(line, height):
-    start, end = line
-    x1, y1 = start
-    x2, y2 = end
-    y1 = height - y1
-    y2 = height - y2
-    start = (x1, y1)
-    end = (x2, y2)
-    # m, b = np.polyfit(start, end, 1)
-
 
 def getLineAttributes(line, width, height):
     lateral_error = 0
@@ -126,6 +145,7 @@ def getLineAttributes(line, width, height):
     return angle_error
 
 def analyseLineScatter(image, pointList, height, width):
+    """ Fit lines to a scatter and find attributes """
     blank_image = np.zeros((height, width), np.uint8)
     xy_sum = 0
     y_sum = 0

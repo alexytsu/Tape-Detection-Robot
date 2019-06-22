@@ -57,11 +57,11 @@ def plan_steering(classified, image, show_camera):
     elif blueAngle:
         angle = int(blueAngle)
         offset = blueOffset
-        steering_angle = angle * 1.5 + 10
+        steering_angle = angle * 1.5 + 3
     elif yellowAngle:
         angle = int(yellowAngle)
         offset = yellowOffset
-        steering_angle = angle * 1.5 - 10
+        steering_angle = angle * 1.5 - 3
     else:
         steering_angle = -3
 

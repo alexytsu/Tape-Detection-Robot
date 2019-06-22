@@ -79,13 +79,7 @@ def mask_lookup(image, color_table):
 
 def get_edges(frame, show_debug):
     dimensions = frame.shape
-    prefilter = np.copy(frame)
-    frame = cv2.bilateralFilter(frame, 9, 75, 75)
-    side_by_side = np.concatenate((prefilter, frame), axis=1)
-    edges = cv2.Canny(frame, 100, 250)
-    if show_debug:
-        cv2.imshow("canny", cv2.resize(side_by_side, (1000,500)))
-        cv2.waitKey(1)
+    edges = cv2.Canny(frame, 50, 250)
     return edges
 
 def get_color_lookup(filename="LOOKUP.pkl"):

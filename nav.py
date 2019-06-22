@@ -14,8 +14,9 @@ def plan_steering(classified, image, show_camera):
     imagified = np.reshape(classified, (height, width))
     image_canonical = np.copy(imagified)
 
-    c_array = imagified / 5
+    c_array = imagified
     cFrame = PyFrame(c_array)
+
 
     cFrame.getTapePoints()
 
@@ -63,6 +64,22 @@ def plan_steering(classified, image, show_camera):
         steering_angle = angle * 1.5 - 10
     else:
         steering_angle = -3
+
+    red_loc = (imagified==2).astype(int)
+    contours, _ = cv2.findContours(red_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    if len(contours) > 0:
+        contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=True)
+        if cv2.contourArea(contours[0]) > 200:
+            x, y, w, h = cv2.boundingRect(contours[0])
+            cv2.rectangle(image, (x, y), (x+w,y+h), (255, 255, 0))
+            cv2.drawContours(image, contours, 0, (255, 0, 255), 0)
+
+            if x < width - (x+h):
+                steering_angle = 30
+            else:
+                steering_angle = -30
+
+
 
     if show_camera:
         try:

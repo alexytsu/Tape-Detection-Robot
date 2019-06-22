@@ -15,6 +15,14 @@ def run(video, arduino, color_lookup, mapping, translation, crop):
     while True:
         start_time = time.time()
         frame, frame_n = video.read()
+
+        if prev_frame == frame_n:
+            continue
+
+        prev_frame = frame_n
+        if frame is None:
+            print("Pass")
+            continue
         frame = cv2.resize(frame, (320, 240), interpolation = cv2.INTER_AREA)
         tape_frame = applyIPT(frame, mapping, translation, crop)
         
@@ -38,16 +46,11 @@ def run(video, arduino, color_lookup, mapping, translation, crop):
         # analyse tape and get a steering direction
         angle, speed = plan_steering(colors, tape_frame, ARGS.show_camera)
         SendSpeed(arduino, int(angle), speed)
-        print(3)
 
         end_time = time.time()
-
         if ARGS.debug_text:
             print(f"FPS: {1/(end_time - start_time):.2f}")
-            if prev_frame == frame_n:
-                print("====== Repeated frame =====")
-        
-        prev_frame = frame_n
+
 
 
 if __name__ == "__main__":
@@ -55,12 +58,17 @@ if __name__ == "__main__":
     # Collect some options from the user
     parser = argparse.ArgumentParser(description="Run the robot")
     # Don't show camera by default
+    parser.add_argument('--debug', action='store_const', const=True, default=False, help="Turn on all other debugging flags") 
     parser.add_argument('--show-camera', action='store_const', const=True, default=False, help="Shows live feeds for debugging") 
     parser.add_argument('--debug-camera', action='store_const', const=True, default=False, help="Shows detailed feeds for debugging") 
     parser.add_argument('--debug-text', action='store_const', const=True, default=False, help="Shows some sparse information for debugging") 
     parser.add_argument('--camera', default=0, help="Choose which camera to work off", type=int) 
-    args = parser.parse_args()
-    ARGS = args
+    ARGS = parser.parse_args()
+
+    if ARGS.debug:
+        ARGS.debug_camera = True
+        ARGS.debug_text = True
+        ARGS.show_camera = True
 
     # Initialise the necessary hardware and AI
     SER = None

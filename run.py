@@ -7,10 +7,11 @@ import cv2
 from arduino import getSerialPort, SendSpeed
 from vision import get_color_lookup, get_perspective_warp, WebcamVideoStream, applyIPT, mask_lookup, get_edges
 from nav import plan_steering
+from car import Car
 
 ARGS = None
 
-def run(video, arduino, color_lookup, mapping, translation, crop):
+def run(video, arduino, color_lookup, mapping, translation, crop, car):
     prev_frame = 0
     while True:
         start_time = time.time()
@@ -45,7 +46,10 @@ def run(video, arduino, color_lookup, mapping, translation, crop):
 
         # analyse tape and get a steering direction
         angle, speed = plan_steering(colors, tape_frame, ARGS.show_camera)
-        SendSpeed(arduino, int(angle), speed)
+        ## SendSpeed(arduino, int(angle), speed)
+        CAR.SendThrottle(26300)
+        CAR.SendSteering(int(angle))
+
 
         end_time = time.time()
         if ARGS.debug_text:
@@ -76,10 +80,17 @@ if __name__ == "__main__":
         SER = getSerialPort() # open port to Arduino controller
     except:
         SER = None
+
+    try:
+        CAR = Car()
+        CAR.sync()
+    except:
+        CAR = None
+
     COLOR_LOOKUP = get_color_lookup() # load the trained color table
     MAPPING, TRANSLATION, CROP = get_perspective_warp() # load the camera transforms
     STREAM = WebcamVideoStream(ARGS.camera).start()
     print("Initialised all")
-    run(STREAM, SER, COLOR_LOOKUP, MAPPING, TRANSLATION, CROP)
+    run(STREAM, SER, COLOR_LOOKUP, MAPPING, TRANSLATION, CROP, CAR)
     # Thread(target=run, args=(STREAM, None, COLOR_LOOKUP, MAPPING, TRANSLATION, CROP,)).start()
 

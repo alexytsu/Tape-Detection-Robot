@@ -83,8 +83,9 @@ if __name__ == "__main__":
 
     try:
         CAR = Car()
-        CAR.sync()
-    except:
+        CAR.Sync()
+    except Exception as e:
+        print(e)
         CAR = None
 
     COLOR_LOOKUP = get_color_lookup() # load the trained color table

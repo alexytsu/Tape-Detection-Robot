@@ -47,8 +47,11 @@ def run(video, arduino, color_lookup, mapping, translation, crop, car):
         # analyse tape and get a steering direction
         angle, speed = plan_steering(colors, tape_frame, ARGS.show_camera)
         ## SendSpeed(arduino, int(angle), speed)
-        CAR.SendThrottle(26300)
         CAR.SendSteering(int(angle))
+        speed = 26400
+        if(abs(angle) > 20):
+            speed = 26130
+        CAR.SendThrottle(speed)
 
 
         end_time = time.time()

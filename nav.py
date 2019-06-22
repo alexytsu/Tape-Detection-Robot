@@ -49,7 +49,7 @@ def plan_steering(classified, image, show_camera):
         angle = int(midAngle)
         offset = midOffset
         offset_angle = int(math.degrees(math.atan2(offset, midy)))
-        steering_angle = int((offset_angle * 9 + angle * 1) / 10)
+        steering_angle = int((offset_angle * 5 + angle * 5) / 10) - 3
     elif blueAngle and yellowAngle:
         angle = int((blueAngle + yellowAngle)/2)
         offset = int((blueOffset + yellowOffset)/2)
@@ -57,16 +57,18 @@ def plan_steering(classified, image, show_camera):
     elif blueAngle:
         angle = int(blueAngle)
         offset = blueOffset
-        steering_angle = angle * 1.5 + 3
+        steering_angle = angle * 1.4 + 5
     elif yellowAngle:
         angle = int(yellowAngle)
         offset = yellowOffset
-        steering_angle = angle * 1.5 - 3
+        steering_angle = angle * 1.4 - 5
     else:
         steering_angle = -3
 
+    """
     red_loc = (imagified==2).astype(int)
     contours, _ = cv2.findContours(red_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    contours = list(filter(lambda x: cv2.contourArea(x) > 500 and cv2.contourArea(x) < 1000, contours))
     if len(contours) > 0:
         contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=True)
         if cv2.contourArea(contours[0]) > 200:
@@ -78,6 +80,7 @@ def plan_steering(classified, image, show_camera):
                 steering_angle = 30
             else:
                 steering_angle = -30
+    """
 
 
 

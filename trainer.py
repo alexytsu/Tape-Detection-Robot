@@ -51,7 +51,7 @@ def train_classifier(data_folder, classifier_name):
 
     # plt.scatter()
     if classifier_name == "adaboost":
-        classifier = AdaBoostClassifier(n_estimators=7, learning_rate=7) 
+        classifier = AdaBoostClassifier(n_estimators=20, learning_rate=1) 
     elif classifier_name == "gaussian":
         classifier = GaussianNB()
     elif classifier_name == "kneighbors":

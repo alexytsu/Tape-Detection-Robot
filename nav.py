@@ -66,16 +66,6 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
             cv2.drawContours(further_image, contours, 0, (255, 0, 255), 0)
             contour_detected = True
             midAngle = None
-
-            """
-            if x < further_width - (x+h):
-                steering_angle += 10
-                speed = 0
-            else:
-                steering_angle -= 10
-                speed = 0
-            """
-
     if midAngle:
         angle = int(midAngle)
         offset = midOffset
@@ -127,7 +117,6 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
             else:
                 steering_angle -= 10
                 speed = 0
-
         else:
             steering_angle = 0
 
@@ -214,7 +203,7 @@ def analyseLineScatter(image, pointList, height, width):
     houghLines = []
 
     # LOWER NUMBER === MOREEE SPAGHETTIIII
-    SPAGHETTI = 20
+    SPAGHETTI = 15
 
     lines = cv2.HoughLines(blank_image, 4, np.pi / 50, SPAGHETTI, None, 0, 0)
     if lines is not None:

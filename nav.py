@@ -49,6 +49,33 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
 
     speed = 95
 
+    # obstacle avoidance
+    red_loc = (further_imagified==2).astype(int)
+    contours, _ = cv2.findContours(red_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    contour_sizes = list(map(cv2.contourArea, contours))
+    print(contour_sizes)
+    contours = list(filter(lambda x: cv2.contourArea(x) > 5000 and cv2.contourArea(x) < 8000, contours))
+
+    contour_detected = False
+    x, y, w, h = None, None, None, None
+    if len(contours) > 0:
+        contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=True)
+        if cv2.contourArea(contours[0]) > 200:
+            x, y, w, h = cv2.boundingRect(contours[0])
+            cv2.rectangle(further_image, (x, y), (x+w,y+h), (255, 255, 0))
+            cv2.drawContours(further_image, contours, 0, (255, 0, 255), 0)
+            contour_detected = True
+            midAngle = None
+
+            """
+            if x < further_width - (x+h):
+                steering_angle += 10
+                speed = 0
+            else:
+                steering_angle -= 10
+                speed = 0
+            """
+
     if midAngle:
         angle = int(midAngle)
         offset = midOffset
@@ -61,37 +88,38 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
     elif blueAngle:
         angle = int(blueAngle)
         offset = blueOffset
+        if contour_detected:
+            x1 = int(width/2)
+            y1 = height + further_height
+
+            x2 = x + w
+            y2 = y + h
+            line = x1, y1, x2, y2
+            angle = getLineAttributes()
+
         steering_angle = angle * 1.5 + 5
+
     elif yellowAngle:
         angle = int(yellowAngle)
         offset = yellowOffset
+
+        if contour_detected:
+            x1 = int(width/2)
+            y1 = height + further_height
+
+            x2 = x
+            y2 = y + h
+            line = x1, y1, x2, y2
+            angle = getLineAttributes()
+
         steering_angle = angle * 1.5 - 5
+
     else:
         angle = 0
         offset = 0
         steering_angle = 0
 
 
-    # obstacle avoidance
-    red_loc = (further_imagified==2).astype(int)
-    contours, _ = cv2.findContours(red_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-    contour_sizes = list(map(cv2.contourArea, contours))
-    print(contour_sizes)
-    contours = list(filter(lambda x: cv2.contourArea(x) > 5000 and cv2.contourArea(x) < 8000, contours))
-
-    if len(contours) > 0:
-        contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=True)
-        if cv2.contourArea(contours[0]) > 200:
-            x, y, w, h = cv2.boundingRect(contours[0])
-            cv2.rectangle(further_image, (x, y), (x+w,y+h), (255, 255, 0))
-            cv2.drawContours(further_image, contours, 0, (255, 0, 255), 0)
-
-            if x < further_width - (x+h):
-                steering_angle += 10
-                speed = 0
-            else:
-                steering_angle -= 10
-                speed = 0
 
 
     if show_camera:
@@ -110,7 +138,8 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
             print("failed to draw some lines")
             pass
 
-        cv2.imshow("res", cv2.resize(further_image, (1280, 720)))
+
+        cv2.imshow("res", cv2.resize(np.vstack(further_image,image), (720, 720)))
         if cv2.waitKey(1) & 0xFF == ord("q"):
             exit()
     return steering_angle, speed
@@ -142,7 +171,7 @@ def gradientIntercept(line, height):
 def getLineAttributes(line, width, height):
     lateral_error = 0
     end, start = line
-    gradientIntercept(line, height)
+    # gradientIntercept(line, height)
     x1, y1 = start
     x2, y2 = end
 

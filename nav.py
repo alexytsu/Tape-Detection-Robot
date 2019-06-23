@@ -94,8 +94,8 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
 
             x2 = x + w
             y2 = y + h
-            line = x1, y1, x2, y2
-            angle = getLineAttributes()
+            line = ((x1, y1), (x2, y2))
+            angle = getLineAttributes(line, None, None)
 
         steering_angle = angle * 1.5 + 5
 
@@ -109,16 +109,21 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
 
             x2 = x
             y2 = y + h
-            line = x1, y1, x2, y2
-            angle = getLineAttributes()
+            line = ((x1, y1), (x2, y2))
+            angle = getLineAttributes(line, None, None)
 
         steering_angle = angle * 1.5 - 5
-
     else:
-        angle = 0
-        offset = 0
-        steering_angle = 0
+        if contour_detected:
+            if x < further_width - (x+h):
+                steering_angle += 10
+                speed = 0
+            else:
+                steering_angle -= 10
+                speed = 0
 
+        else:
+            steering_angle = 0
 
 
 
@@ -139,7 +144,7 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
             pass
 
 
-        cv2.imshow("res", cv2.resize(np.vstack(further_image,image), (720, 720)))
+        cv2.imshow("res", cv2.resize(np.vstack((further_image,image)), (720, 720)))
         if cv2.waitKey(1) & 0xFF == ord("q"):
             exit()
     return steering_angle, speed

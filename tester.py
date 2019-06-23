@@ -33,7 +33,7 @@ def test_model(color_table, filename=None):
 
     # load the video file
     if CAMERA:
-        video = WebcamVideoStream(src=2).start()
+        video = WebcamVideoStream(src=5).start()
     else:
         """
         video_file_path = os.path.join("footage", choose_file("footage"))
@@ -47,7 +47,7 @@ def test_model(color_table, filename=None):
         frame = None
         if CAMERA:
             frame, thread_frame_number = video.read()
-            frame = applyIPT(frame, MAPPING, TRANSLATION, CROP)
+            #frame = applyIPT(frame, MAPPING, TRANSLATION, CROP)
         else:
             retval, frame = video.read()
             if not retval:

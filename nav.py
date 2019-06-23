@@ -65,10 +65,13 @@ def plan_steering(classified, image, show_camera):
     else:
         steering_angle = -3
 
-    """
+    
     red_loc = (imagified==2).astype(int)
     contours, _ = cv2.findContours(red_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    contour_sizes = map(contours, cv2.contourArea)
     contours = list(filter(lambda x: cv2.contourArea(x) > 500 and cv2.contourArea(x) < 1000, contours))
+    print(contour_sizes)
+
     if len(contours) > 0:
         contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=True)
         if cv2.contourArea(contours[0]) > 200:
@@ -80,8 +83,6 @@ def plan_steering(classified, image, show_camera):
                 steering_angle = 30
             else:
                 steering_angle = -30
-    """
-
 
 
     if show_camera:

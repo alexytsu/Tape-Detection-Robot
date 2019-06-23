@@ -53,49 +53,23 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
         angle = int(midAngle)
         offset = midOffset
         offset_angle = int(math.degrees(math.atan2(offset, midy)))
-        steering_angle = int((offset_angle * 5 + angle * 5) / 10) - 3
+        steering_angle = int((offset_angle * 5 + angle * 5) / 10)
     elif blueAngle and yellowAngle:
         angle = int((blueAngle + yellowAngle)/2)
         offset = int((blueOffset + yellowOffset)/2)
-        steering_angle = angle
+        steering_angle = angle * 1.5
     elif blueAngle:
         angle = int(blueAngle)
         offset = blueOffset
-        steering_angle = angle * 1.4 + 5
+        steering_angle = angle * 1.5 + 5
     elif yellowAngle:
         angle = int(yellowAngle)
         offset = yellowOffset
-        steering_angle = angle * 1.4 - 5
+        steering_angle = angle * 1.5 - 5
     else:
-        # use the further frame
-        further_frame = PyFrame(further_imagified)
-
-        further_frame.getTapePoints()
-        midAngle, midOffset = analyseLineScatter(further_image, cFrame.getMidPoints(), further_height, further_width)
-        blueAngle, blueOffset = analyseLineScatter(further_image, cFrame.getDarkPoints(), further_height, further_width)
-        yellowAngle, blueAngle = analyseLineScatter(further_image, cFrame.getLightPoints(), further_height, further_width)
-
-        if midAngle:
-            angle = int(midAngle)
-            offset = midOffset
-            offset_angle = int(math.degrees(math.atan2(offset, midy)))
-            steering_angle = int((offset_angle * 5 + angle * 5) / 10) - 3
-        elif blueAngle and yellowAngle:
-            angle = int((blueAngle + yellowAngle)/2)
-            offset = int((blueOffset + yellowOffset)/2)
-            steering_angle = angle
-        elif blueAngle:
-            angle = int(blueAngle)
-            offset = blueOffset
-            steering_angle = angle * 1.4 + 5
-        elif yellowAngle:
-            angle = int(yellowAngle)
-            offset = yellowOffset
-            steering_angle = angle * 1.4 - 5
-        else:
-            angle = 0
-            offset = 0
-            steering_angle = 0
+        angle = 0
+        offset = 0
+        steering_angle = 0
 
 
     # obstacle avoidance
@@ -113,10 +87,10 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
             cv2.drawContours(further_image, contours, 0, (255, 0, 255), 0)
 
             if x < further_width - (x+h):
-                steering_angle = 30
+                steering_angle += 10
                 speed = 0
             else:
-                steering_angle = -30
+                steering_angle -= 10
                 speed = 0
 
 

@@ -15,7 +15,7 @@ def get_spaced_frames(filename, length, get_n):
 
     filepath = os.path.join("footage", filename)
     print(f"From a file of {length} frames we want {get_n} frames")
-    spacing = int((length-10)/get_n/10)
+    spacing = int((length-100)/get_n)
     print("Spacing: ", spacing)
 
     # initialise loop
@@ -106,7 +106,7 @@ def collect_points(filename=None):
 
     # get some evenly space frames from the video
     gap()
-    get_n = 3
+    get_n = 5
     frames, n_got = get_spaced_frames(filename, l, get_n)
     print(f"Tried to get {get_n} frames and got {n_got}")
 

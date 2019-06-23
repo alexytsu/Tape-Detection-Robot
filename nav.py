@@ -88,6 +88,9 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
     elif blueAngle:
         angle = int(blueAngle)
         offset = blueOffset
+
+
+        """
         if contour_detected:
             x1 = int(width/2)
             y1 = height + further_height
@@ -96,6 +99,7 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
             y2 = y + h
             line = ((x1, y1), (x2, y2))
             angle = getLineAttributes(line, None, None)
+        """
 
         steering_angle = angle * 1.5 + 5
 
@@ -103,6 +107,7 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
         angle = int(yellowAngle)
         offset = yellowOffset
 
+        """
         if contour_detected:
             x1 = int(width/2)
             y1 = height + further_height
@@ -111,6 +116,7 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
             y2 = y + h
             line = ((x1, y1), (x2, y2))
             angle = getLineAttributes(line, None, None)
+        """
 
         steering_angle = angle * 1.5 - 5
     else:

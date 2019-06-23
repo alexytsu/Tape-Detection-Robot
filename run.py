@@ -11,7 +11,7 @@ from car import Car
 
 ARGS = None
 
-def run(video, arduino, color_lookup, mapping, translation, crop, car):
+def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, car):
     prev_frame = 0
     while True:
         start_time = time.time()
@@ -26,6 +26,7 @@ def run(video, arduino, color_lookup, mapping, translation, crop, car):
             continue
         frame = cv2.resize(frame, (320, 240), interpolation = cv2.INTER_AREA)
         tape_frame = applyIPT(frame, mapping, translation, crop)
+        further_frame = applyIPT(frame, mapping, translation, crop_other)
         
         # resize the navigation frame
         """
@@ -43,9 +44,10 @@ def run(video, arduino, color_lookup, mapping, translation, crop, car):
 
         # classify
         colors = mask_lookup(tape_frame, color_lookup)
+        other_colors = mask_lookup(further_frame, color_lookup)
 
         # analyse tape and get a steering direction
-        angle, speed = plan_steering(colors, tape_frame, ARGS.show_camera)
+        angle, speed = plan_steering(colors, tape_frame, other_colors, further_frame, ARGS.show_camera)
         ## SendSpeed(arduino, int(angle), speed)
         CAR.SendSteering(int(angle))
         speed = 26400
@@ -92,9 +94,9 @@ if __name__ == "__main__":
         CAR = None
 
     COLOR_LOOKUP = get_color_lookup() # load the trained color table
-    MAPPING, TRANSLATION, CROP = get_perspective_warp() # load the camera transforms
+    MAPPING, TRANSLATION, CROP, CROP_OTHER = get_perspective_warp() # load the camera transforms
     STREAM = WebcamVideoStream(ARGS.camera).start()
     print("Initialised all")
-    run(STREAM, SER, COLOR_LOOKUP, MAPPING, TRANSLATION, CROP, CAR)
+    run(STREAM, SER, COLOR_LOOKUP, MAPPING, TRANSLATION, CROP, CROP_OTHER, CAR)
     # Thread(target=run, args=(STREAM, None, COLOR_LOOKUP, MAPPING, TRANSLATION, CROP,)).start()
 

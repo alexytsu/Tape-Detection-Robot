@@ -7,12 +7,12 @@ import numpy as np
 from fr import PyFrame
 from helper import writeLineAttributes
 
-def plan_steering(classified, image, show_camera):
+def plan_steering(classified, image, further_classified, further_image, show_camera):
     height = image.shape[0]
     width = image.shape[1]
 
     imagified = np.reshape(classified, (height, width))
-    image_canonical = np.copy(imagified)
+    # image_canonical = np.copy(imagified)
 
     c_array = imagified
     cFrame = PyFrame(c_array)
@@ -63,10 +63,43 @@ def plan_steering(classified, image, show_camera):
         offset = yellowOffset
         steering_angle = angle * 1.4 - 5
     else:
-        steering_angle = -3
+        # use the further frame
+        further_height = further_image.shape[0]
+        further_width = further_image.shape[1]
 
-    
-    red_loc = (imagified==2).astype(int)
+        further_imagified = np.reshape(further_classified, (height, width))
+        further_frame = PyFrame(further_imagified)
+
+        further_frame.getTapePoints()
+        midAngle, midOffset = analyseLineScatter(further_image, cFrame.getMidPoints(), further_height, further_width)
+        blueAngle, blueOffset = analyseLineScatter(further_image, cFrame.getDarkPoints(), further_height, further_width)
+        yellowAngle, blueAngle = analyseLineScatter(further_image, cFrame.getLightPoints(), further_height, further_width)
+
+        if midAngle:
+            angle = int(midAngle)
+            offset = midOffset
+            offset_angle = int(math.degrees(math.atan2(offset, midy)))
+            steering_angle = int((offset_angle * 5 + angle * 5) / 10) - 3
+        elif blueAngle and yellowAngle:
+            angle = int((blueAngle + yellowAngle)/2)
+            offset = int((blueOffset + yellowOffset)/2)
+            steering_angle = angle
+        elif blueAngle:
+            angle = int(blueAngle)
+            offset = blueOffset
+            steering_angle = angle * 1.4 + 5
+        elif yellowAngle:
+            angle = int(yellowAngle)
+            offset = yellowOffset
+            steering_angle = angle * 1.4 - 5
+        else:
+            angle = 0
+            offset = 0
+            steering_angle = 0
+
+
+    # obstacle avoidance
+    red_loc = (further_imagified==2).astype(int)
     contours, _ = cv2.findContours(red_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     contour_sizes = map(contours, cv2.contourArea)
     contours = list(filter(lambda x: cv2.contourArea(x) > 500 and cv2.contourArea(x) < 1000, contours))
@@ -165,7 +198,7 @@ def analyseLineScatter(image, pointList, height, width):
     houghLines = []
 
     # LOWER NUMBER === MOREEE SPAGHETTIIII
-    SPAGHETTI = 15
+    SPAGHETTI = 20
 
     lines = cv2.HoughLines(blank_image, 4, np.pi / 50, SPAGHETTI, None, 0, 0)
     if lines is not None:

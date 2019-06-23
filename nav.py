@@ -13,6 +13,10 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
 
     imagified = np.reshape(classified, (height, width))
     # image_canonical = np.copy(imagified)
+    further_height = further_image.shape[0]
+    further_width = further_image.shape[1]
+
+    further_imagified = np.reshape(further_classified, (further_height, further_width))
 
     c_array = imagified
     cFrame = PyFrame(c_array)
@@ -64,10 +68,6 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
         steering_angle = angle * 1.4 - 5
     else:
         # use the further frame
-        further_height = further_image.shape[0]
-        further_width = further_image.shape[1]
-
-        further_imagified = np.reshape(further_classified, (height, width))
         further_frame = PyFrame(further_imagified)
 
         further_frame.getTapePoints()
@@ -101,21 +101,23 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
     # obstacle avoidance
     red_loc = (further_imagified==2).astype(int)
     contours, _ = cv2.findContours(red_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-    contour_sizes = map(contours, cv2.contourArea)
-    contours = list(filter(lambda x: cv2.contourArea(x) > 500 and cv2.contourArea(x) < 1000, contours))
+    contour_sizes = list(map(cv2.contourArea, contours))
     print(contour_sizes)
+    contours = list(filter(lambda x: cv2.contourArea(x) > 5000 and cv2.contourArea(x) < 8000, contours))
 
     if len(contours) > 0:
         contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=True)
         if cv2.contourArea(contours[0]) > 200:
             x, y, w, h = cv2.boundingRect(contours[0])
-            cv2.rectangle(image, (x, y), (x+w,y+h), (255, 255, 0))
-            cv2.drawContours(image, contours, 0, (255, 0, 255), 0)
+            cv2.rectangle(further_image, (x, y), (x+w,y+h), (255, 255, 0))
+            cv2.drawContours(further_image, contours, 0, (255, 0, 255), 0)
 
-            if x < width - (x+h):
+            if x < further_width - (x+h):
                 steering_angle = 30
+                speed = 0
             else:
                 steering_angle = -30
+                speed = 0
 
 
     if show_camera:
@@ -134,7 +136,7 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
             print("failed to draw some lines")
             pass
 
-        cv2.imshow("res", cv2.resize(image, (1280, 720)))
+        cv2.imshow("res", cv2.resize(further_image, (1280, 720)))
         if cv2.waitKey(1) & 0xFF == ord("q"):
             exit()
     return steering_angle, speed

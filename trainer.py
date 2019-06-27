@@ -31,9 +31,6 @@ def train_classifier(data_folder, classifier_name):
     Sats = []
     y = []
 
-    print(len(Blue))
-    exit()
-
     for i, x in Blue.iterrows():
         X.append([x.H, x.S])
         y.append(1)

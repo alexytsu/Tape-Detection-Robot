@@ -10,6 +10,7 @@ cdef extern from "Frame.h" namespace "frame":
         vector[vector[double]] arr;
         vector[pair[int, int]] lightvec
         vector[pair[int, int]] darkvec
+        double percentage;
         vector[pair[int, int]] getMidPoints()
         vector[pair[int, int]] getTapePoints()
         vector[pair[int, int]] getDarkPoints()

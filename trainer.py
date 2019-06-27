@@ -31,6 +31,9 @@ def train_classifier(data_folder, classifier_name):
     Sats = []
     y = []
 
+    print(len(Blue))
+    exit()
+
     for i, x in Blue.iterrows():
         X.append([x.H, x.S])
         y.append(1)
@@ -58,6 +61,8 @@ def train_classifier(data_folder, classifier_name):
         classifier = KNeighborsClassifier(3)
     elif classifier_name == "bayes":
         classifier = GaussianProcessClassifier(1.0 * RBF(1.0))
+    elif classifier_name == "forest":
+        classifier = RandomForestClassifier(n_estimators=100)
     else:
         print("NO VALID CLASSIFIER SELECTED")
         exit()

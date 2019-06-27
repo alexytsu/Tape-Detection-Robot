@@ -7,6 +7,8 @@ using namespace std;
 Frame::Frame(vector<vector<double>> f)
 {
     arr = f;
+    // percentage of the frame to consider for navigation purposes
+    percentage = 0.25;
 }
 
 Frame::~Frame()
@@ -17,7 +19,7 @@ vector<pair<int, int>> Frame::getTapePoints()
 {
     vector<pair<int, int>> darkvec;
     vector<pair<int, int>> lightvec;
-    for (uint32_t i = (uint32_t)0; i < (uint32_t)(arr.size()); i++)
+    for (uint32_t i = (uint32_t)(arr.size() * (1 - this->percentage)); i < (uint32_t)(arr.size()); i++)
     {
 
         int dark_j = 0;

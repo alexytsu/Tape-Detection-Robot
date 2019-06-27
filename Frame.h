@@ -10,6 +10,7 @@ namespace frame {
         vector<pair<int, int>> darkvec;
         vector<pair<int, int>> lightvec;
         vector<pair<int, int>> midpoints;
+        double percentage;
         Frame(vector<vector<double>> arr);
         ~Frame();
         vector<pair<int, int>> getTapePoints();

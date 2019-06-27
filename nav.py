@@ -12,15 +12,8 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
     width = image.shape[1]
 
     imagified = np.reshape(classified, (height, width))
-    # image_canonical = np.copy(imagified)
-    further_height = further_image.shape[0]
-    further_width = further_image.shape[1]
-
-    further_imagified = np.reshape(further_classified, (further_height, further_width))
-
     c_array = imagified
     cFrame = PyFrame(c_array)
-
 
     cFrame.getTapePoints()
 
@@ -50,22 +43,12 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
     speed = 95
 
     # obstacle avoidance
-    red_loc = (further_imagified==2).astype(int)
+    red_loc = (imagified ==2).astype(int)
     contours, _ = cv2.findContours(red_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+
     contour_sizes = list(map(cv2.contourArea, contours))
     print(contour_sizes)
-    contours = list(filter(lambda x: cv2.contourArea(x) > 5000 and cv2.contourArea(x) < 8000, contours))
 
-    contour_detected = False
-    x, y, w, h = None, None, None, None
-    if len(contours) > 0:
-        contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=True)
-        if cv2.contourArea(contours[0]) > 200:
-            x, y, w, h = cv2.boundingRect(contours[0])
-            cv2.rectangle(further_image, (x, y), (x+w,y+h), (255, 255, 0))
-            cv2.drawContours(further_image, contours, 0, (255, 0, 255), 0)
-            contour_detected = True
-            midAngle = None
     if midAngle:
         angle = int(midAngle)
         offset = midOffset
@@ -78,47 +61,37 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
     elif blueAngle:
         angle = int(blueAngle)
         offset = blueOffset
-
-
-        """
-        if contour_detected:
-            x1 = int(width/2)
-            y1 = height + further_height
-
-            x2 = x + w
-            y2 = y + h
-            line = ((x1, y1), (x2, y2))
-            angle = getLineAttributes(line, None, None)
-        """
-
         steering_angle = angle * 1.5 + 5
-
     elif yellowAngle:
         angle = int(yellowAngle)
         offset = yellowOffset
-
-        """
-        if contour_detected:
-            x1 = int(width/2)
-            y1 = height + further_height
-
-            x2 = x
-            y2 = y + h
-            line = ((x1, y1), (x2, y2))
-            angle = getLineAttributes(line, None, None)
-        """
-
         steering_angle = angle * 1.5 - 5
     else:
-        if contour_detected:
-            if x < further_width - (x+h):
-                steering_angle += 10
-                speed = 0
-            else:
-                steering_angle -= 10
-                speed = 0
+        steering_angle = 0
+
+    contours = list(filter(lambda x: cv2.contourArea(x) > 1000 and cv2.contourArea(x) < 4000, contours))
+    contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
+    if len(contours) > 0:
+        x, y, w, h = cv2.boundingRect(contours[0])
+        cv2.rectangle(image, (x, y), (x+w,y+h), (255, 255, 0))
+        cv2.drawContours(image, contours, 0, (255, 0, 255), 0)
+
+        left_edge_offset = x - midx
+        right_edge_offset = x + h - midx
+
+        left_gap = abs(blueOffset - left_edge_offset)
+        right_gap = abs(yellowOffset - right_edge_offset)
+
+        if left_gap > right_gap:
+            avoid_offset = blueOffset + (x - midx)
+            avoid_offset = avoid_offset/2
+            angle_radians = math.atan2(avoid_offset, height - (y+h))
+            steering_angle = int(math.degrees(angle_radians))
         else:
-            steering_angle = 0
+            avoid_offset = yellowOffset + (x + h - midx)
+            avoid_offset = avoid_offset/2
+            angle_radians = math.atan2(avoid_offset, height - (y+h))
+            steering_angle = int(math.degrees(angle_radians))
 
 
 
@@ -129,17 +102,16 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
             navPoint = (midx + xdiff, midy)
             cv2.line(image, bottomPoint, navPoint, (0, 0, 0), 1, cv2.LINE_AA)
             cv2.line(image, (midx, midy), (midx + offset, midy), (100, 100, 100), 1, cv2.LINE_AA)
-
             xdiff = int(math.tan(math.radians(steering_angle)) * midy)
             bottomPoint = (midx, height)
             navPoint = (midx + xdiff, midy)
-            cv2.line(image, bottomPoint, navPoint, (255, 255, 255), 3, cv2.LINE_AA)
+            cv2.line(image, bottomPoint, navPoint, (255, 50, 150), 3, cv2.LINE_AA)
         except:
             print("failed to draw some lines")
             pass
 
 
-        cv2.imshow("res", cv2.resize(np.vstack((further_image,image)), (720, 720)))
+        cv2.imshow("res", cv2.resize(image, (720, 720)))
         if cv2.waitKey(1) & 0xFF == ord("q"):
             exit()
     return steering_angle, speed

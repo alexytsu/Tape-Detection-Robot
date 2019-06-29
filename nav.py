@@ -50,12 +50,13 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
     #print(contour_sizes)
 
     angleMultiplier = 2
+    correctionOffset = 40
 
     if midAngle:
         angle = int(midAngle)
         offset = midOffset
         offset_angle = int(math.degrees(math.atan2(offset, midy)))
-        steering_angle = int((offset_angle * 7 + angle * 3) / 10) * angleMultiplier
+        steering_angle = int((offset_angle * 8 + angle * 2) / 10) * angleMultiplier
     elif blueAngle and yellowAngle:
         angle = int((blueAngle + yellowAngle)/2)
         offset = int((blueOffset + yellowOffset)/2)
@@ -63,11 +64,15 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
     elif blueAngle:
         angle = int(blueAngle)
         offset = blueOffset
-        steering_angle = angle * angleMultiplier + 15
+        steering_angle = angle * angleMultiplier + correctionOffset
+        if offset > 0:
+            steering_angle = 50
     elif yellowAngle:
         angle = int(yellowAngle)
         offset = yellowOffset
-        steering_angle = angle * angleMultiplier - 15
+        steering_angle = angle * angleMultiplier - correctionOffset
+        if offset < 0:
+            steering_angle = -50
     else:
         steering_angle = 0
 

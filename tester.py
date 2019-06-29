@@ -65,7 +65,7 @@ def test_model(color_table, filename=None):
         # preprocess
         edges = get_edges(frame, True)
         edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
-        # frame = edges & frame
+        #frame = edges & frame
 
         full_ynew = mask_lookup(frame, color_table)
         mask_image = show_masks(full_ynew, frame, "full", w, h)
@@ -75,6 +75,7 @@ def test_model(color_table, filename=None):
         total = np.concatenate((horizontal1, horizontal2), axis=0)
 
         cv2.imshow("debug", total)
+        cv2.waitKey(1)
 
         # classify
         other_ynew = mask_lookup(frame, color_table)
@@ -95,6 +96,8 @@ if __name__ == "__main__":
         SER = getSerialPort()
     except:
         SER = None
+
+    CAMERA = False
 
 
     ipm_file = open('../IPMtest/source/homographyMatrix.p', 'rb')

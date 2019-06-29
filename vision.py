@@ -78,7 +78,6 @@ def mask_lookup(image, color_table):
     return result
 
 def get_edges(frame, show_debug):
-    dimensions = frame.shape
     edges = cv2.Canny(frame, 50, 250)
     return edges
 

@@ -49,27 +49,29 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
     #contour_sizes = list(map(cv2.contourArea, contours))
     #print(contour_sizes)
 
+    angleMultiplier = 2
+
     if midAngle:
         angle = int(midAngle)
         offset = midOffset
         offset_angle = int(math.degrees(math.atan2(offset, midy)))
-        steering_angle = int((offset_angle * 5 + angle * 5) / 10)
+        steering_angle = int((offset_angle * 7 + angle * 3) / 10) * angleMultiplier
     elif blueAngle and yellowAngle:
         angle = int((blueAngle + yellowAngle)/2)
         offset = int((blueOffset + yellowOffset)/2)
-        steering_angle = angle * 1.5
+        steering_angle = angle * angleMultiplier
     elif blueAngle:
         angle = int(blueAngle)
         offset = blueOffset
-        steering_angle = angle * 1.5 + 15
+        steering_angle = angle * angleMultiplier + 15
     elif yellowAngle:
         angle = int(yellowAngle)
         offset = yellowOffset
-        steering_angle = angle * 1.5 - 15
+        steering_angle = angle * angleMultiplier - 15
     else:
         steering_angle = 0
 
-    contours = list(filter(lambda x: cv2.contourArea(x) > 4000 and cv2.contourArea(x) < 10000, contours))
+    contours = list(filter(lambda x: cv2.contourArea(x) > 4000 and cv2.contourArea(x) < 20000, contours))
     contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
     if len(contours) > 0:
         x, y, w, h = cv2.boundingRect(contours[0])
@@ -77,27 +79,29 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
         cv2.drawContours(image, contours, 0, (255, 0, 255), 0)
 
         if not blueAngle:
-            blueOffset = -int(width)
+            blueOffset = -int(width/2)
         if not yellowAngle:
-            yellowOffset = int(width)
+            yellowOffset = int(width/2)
 
-        left_edge_offset = x - midx
-        right_edge_offset = x + h - midx
+        left_edge_offset = x - int(width/2)
+        right_edge_offset = x + w - int(width/2)
 
-        left_gap = abs(blueOffset - left_edge_offset)
-        right_gap = abs(yellowOffset - right_edge_offset)
+        left_gap = left_edge_offset - blueOffset
+        right_gap = yellowOffset - right_edge_offset
 
 
         if left_gap > right_gap:
             avoid_offset = blueOffset + (x - midx)
             avoid_offset = avoid_offset/2
             angle_radians = math.atan2(avoid_offset, height - (y+h))
-            steering_angle = int(math.degrees(angle_radians))
+            steering_angle = -30
+            #steering_angle = int(math.degrees(angle_radians)) * 2
         else:
             avoid_offset = yellowOffset + (x + h - midx)
             avoid_offset = avoid_offset/2
             angle_radians = math.atan2(avoid_offset, height - (y+h))
-            steering_angle = int(math.degrees(angle_radians))
+            #steering_angle = int(math.degrees(angle_radians)) * 2
+            steering_angle = 30
 
 
 

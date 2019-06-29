@@ -52,9 +52,10 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
         angle, speed = plan_steering(colors, tape_frame, None, None, ARGS.show_camera)
         ## SendSpeed(arduino, int(angle), speed)
         CAR.SendSteering(int(angle  - 3))
-        STRAIGHT_SPEED = 26330
+        STRAIGHT_SPEED = 26380
+        OBSTACLE_SPEED = 26100
         if speed == 0:
-            speed == 26100
+            speed = OBSTACLE_SPEED
         else:
             speed = STRAIGHT_SPEED
             if(abs(angle) > 15):

@@ -43,10 +43,11 @@ vector<pair<int, int>> Frame::getTapePoints()
             }
         }
 
-        int dark_centroid = dark_j / n_dark;
-        int light_centroid = light_centroid / n_light;
+        if(n_dark != 0 && n_light != 0) {
+        uint16_t dark_centroid = dark_j / n_dark;
+        uint16_t light_centroid = light_j / n_light;
 
-        int middle = width/2;
+        uint16_t middle = width/2;
         if (dark_centroid > light_centroid) {
             middle = (dark_centroid + light_centroid) / 2;
             if(middle > width/2) {
@@ -55,6 +56,7 @@ vector<pair<int, int>> Frame::getTapePoints()
                 n_light = 0;
             }
         }
+}
 
         
 

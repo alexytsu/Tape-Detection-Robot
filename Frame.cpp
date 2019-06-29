@@ -8,7 +8,7 @@ Frame::Frame(vector<vector<double>> f)
 {
     arr = f;
     // percentage of the frame to consider for navigation purposes
-    percentage = 0.25;
+    percentage = 0.5;
 }
 
 Frame::~Frame()

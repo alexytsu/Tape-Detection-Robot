@@ -49,12 +49,20 @@ class Car():
 
     def SendSteering(self,val):
         angle = 90 + val
+        angle = max(55, angle)
+        angle = min(135, angle)
         self.write(angle,self.Steering)
 
     def Sync(self):
-        test = '/dev/ttyUSB{}'
+        counter = 0
         for val in range(100):
-            input = test.format(val)
+            if(val%2==0):
+                test = '/dev/ttyUSB{}'
+            else:
+                test = '/dev/ttyACM{}'
+            input = test.format(counter)
+            if(val%2==1):
+                counter+=1
             try:
                 ser = serial.Serial(input)
                 print("connected to", input)

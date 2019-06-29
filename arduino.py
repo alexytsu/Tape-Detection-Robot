@@ -6,6 +6,7 @@ import time
 
 def SendSpeed(ser, steering, speed): #servo and motor interface
     adjusted_angle = 90 + steering
+    print("angle", adjusted_angle)
     if steering < -35:
         adjusted_angle = 55
     if steering > 35:

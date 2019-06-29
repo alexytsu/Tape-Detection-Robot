@@ -46,8 +46,8 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
     red_loc = (imagified ==2).astype(int)
     contours, _ = cv2.findContours(red_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
 
-    contour_sizes = list(map(cv2.contourArea, contours))
-    print(contour_sizes)
+    #contour_sizes = list(map(cv2.contourArea, contours))
+    #print(contour_sizes)
 
     if midAngle:
         angle = int(midAngle)
@@ -61,26 +61,32 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
     elif blueAngle:
         angle = int(blueAngle)
         offset = blueOffset
-        steering_angle = angle * 1.5 + 5
+        steering_angle = angle * 1.5 + 15
     elif yellowAngle:
         angle = int(yellowAngle)
         offset = yellowOffset
-        steering_angle = angle * 1.5 - 5
+        steering_angle = angle * 1.5 - 15
     else:
         steering_angle = 0
 
-    contours = list(filter(lambda x: cv2.contourArea(x) > 1000 and cv2.contourArea(x) < 4000, contours))
+    contours = list(filter(lambda x: cv2.contourArea(x) > 4000 and cv2.contourArea(x) < 10000, contours))
     contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
     if len(contours) > 0:
         x, y, w, h = cv2.boundingRect(contours[0])
         cv2.rectangle(image, (x, y), (x+w,y+h), (255, 255, 0))
         cv2.drawContours(image, contours, 0, (255, 0, 255), 0)
 
+        if not blueAngle:
+            blueOffset = -int(width)
+        if not yellowAngle:
+            yellowOffset = int(width)
+
         left_edge_offset = x - midx
         right_edge_offset = x + h - midx
 
         left_gap = abs(blueOffset - left_edge_offset)
         right_gap = abs(yellowOffset - right_edge_offset)
+
 
         if left_gap > right_gap:
             avoid_offset = blueOffset + (x - midx)
@@ -111,7 +117,7 @@ def plan_steering(classified, image, further_classified, further_image, show_cam
             pass
 
 
-        cv2.imshow("res", cv2.resize(image, (720, 720)))
+        cv2.imshow("res", cv2.resize(image, (600, 600)))
         if cv2.waitKey(1) & 0xFF == ord("q"):
             exit()
     return steering_angle, speed
@@ -175,7 +181,7 @@ def analyseLineScatter(image, pointList, height, width):
     houghLines = []
 
     # LOWER NUMBER === MOREEE SPAGHETTIIII
-    SPAGHETTI = 15
+    SPAGHETTI = 17
 
     lines = cv2.HoughLines(blank_image, 4, np.pi / 50, SPAGHETTI, None, 0, 0)
     if lines is not None:

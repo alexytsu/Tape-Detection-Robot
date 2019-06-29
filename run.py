@@ -26,7 +26,9 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
             continue
         frame = cv2.resize(frame, (320, 240), interpolation = cv2.INTER_AREA)
         tape_frame = applyIPT(frame, mapping, translation, crop)
-        further_frame = applyIPT(frame, mapping, translation, crop_other)
+
+	
+        # further_frame = applyIPT(frame, mapping, translation, crop_other)
         
         # resize the navigation frame
         """
@@ -44,18 +46,19 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
 
         # classify
         colors = mask_lookup(tape_frame, color_lookup)
-        other_colors = mask_lookup(further_frame, color_lookup)
+        # other_colors = mask_lookup(further_frame, color_lookup)
 
         # analyse tape and get a steering direction
-        angle, speed = plan_steering(colors, tape_frame, other_colors, further_frame, ARGS.show_camera)
+        angle, speed = plan_steering(colors, tape_frame, None, None, ARGS.show_camera)
         ## SendSpeed(arduino, int(angle), speed)
-        CAR.SendSteering(int(angle))
+        CAR.SendSteering(int(angle  - 3))
+        STRAIGHT_SPEED = 26330
         if speed == 0:
-            speed == 26000
+            speed == 26100
         else:
-            speed = 26300
-            if(abs(angle) > 20):
-                speed = 26200
+            speed = STRAIGHT_SPEED
+            if(abs(angle) > 15):
+                speed = 26150
         CAR.SendThrottle(speed)
 
 

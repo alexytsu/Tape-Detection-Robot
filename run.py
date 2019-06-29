@@ -13,13 +13,19 @@ ARGS = None
 
 def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, car):
     prev_frame = 0
+    lastRealFrame = time.time()
     while True:
+
         start_time = time.time()
         frame, frame_n = video.read()
 
         if prev_frame == frame_n:
-            print("repeat")
             continue
+        else:
+            if ARGS.debug_text:
+                gap = time.time() - lastRealFrame
+                lastRealFrame = time.time()
+                print(f"Frame Gap: {1/(gap):.2f} FPS {gap*1000:.2f} ms")
 
         prev_frame = frame_n
         if frame is None:
@@ -66,7 +72,7 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
 
         end_time = time.time()
         if ARGS.debug_text:
-            print(f"FPS: {1/(end_time - start_time):.2f}")
+            print(f"Processing FPS: {1/(end_time - start_time):.2f}")
 
 
 

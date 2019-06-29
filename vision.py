@@ -15,6 +15,8 @@ class WebcamVideoStream:
         self.stream = cv2.VideoCapture(src)
         self.stream.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
         self.stream.set(cv2.CAP_PROP_FPS, 60)
+        self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+        self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
         (self.grabbed, self.frame) = self.stream.read()
         self.stopped = False
         self.frame_number = 0

@@ -18,6 +18,7 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
         frame, frame_n = video.read()
 
         if prev_frame == frame_n:
+            print("repeat")
             continue
 
         prev_frame = frame_n

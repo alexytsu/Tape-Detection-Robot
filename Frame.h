@@ -13,7 +13,7 @@ namespace frame {
         double percentage;
         Frame(vector<vector<double>> arr);
         ~Frame();
-        vector<pair<int, int>> getTapePoints();
+        vector<pair<int, int>> getTapePoints(bool top);
         vector<pair<int, int>> getMidPoints();
         vector<pair<int, int>> getLightPoints();
         vector<pair<int, int>> getDarkPoints();

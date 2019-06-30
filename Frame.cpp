@@ -15,7 +15,7 @@ Frame::~Frame()
 {
 }
 
-vector<pair<int, int>> Frame::getTapePoints()
+vector<pair<int, int>> Frame::getTapePoints(bool top)
 {
     vector<pair<int, int>> darkvec;
     vector<pair<int, int>> lightvec;
@@ -28,17 +28,22 @@ vector<pair<int, int>> Frame::getTapePoints()
         int light_j = 0;
         int n_light = 0;
 
+
         uint32_t width = arr[0].size();
+        uint16_t limit = width/2;
+        if (top == true) limit = 0;
+
+
         for (uint32_t j = 0; j < width; j++)
         {
 
-            if (arr[i][j] == 1)
+            if (arr[i][j] == 1 && j < width - limit)
             {
                 n_dark++;
                 dark_j += j;
             }
 
-            if (arr[i][j] == 3)
+            if (arr[i][j] == 3 && j > limit)
             {
                 n_light++;
                 light_j += j;

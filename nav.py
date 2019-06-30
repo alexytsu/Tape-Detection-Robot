@@ -7,6 +7,72 @@ import numpy as np
 from fr import PyFrame
 from helper import writeLineAttributes
 
+def plan_steering(classified, image, show_camera):
+
+    height = image.shape[0]
+    width = image.shape[1]
+    midx = int(width/2)
+    midy = int(height/2)
+
+    imagified = np.reshape(classified, (height, width))
+
+    # split image in two
+    divider = int(3*height/4)
+    imagifiedTop = imagified[:divider, :]
+    imagifiedBottom = imagified[divider:, :]
+    imageTop = image[:divider, :]
+    imageBottom = image[divider:, :]
+
+    # split analysis on top and bottom half
+    bottom_angle, bottomAux = analyse_half(
+        "bottom", imagifiedBottom, imageBottom, show_camera)
+    top_angle, topAux = analyse_half(
+        "top", imagifiedTop, imageTop, show_camera)
+
+    steering_angle, speed = decideBehaviour(bottom_angle, top_angle)
+
+    """
+    OBSTACLE AVOIDANCE OVERRIDE
+    """
+    """
+    red_loc = (imagified ==2).astype(int)
+    contours, _ = cv2.findContours(red_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    contour_sizes = list(map(cv2.contourArea, contours))
+    print(contour_sizes)
+
+    contours = list(filter(lambda x: cv2.contourArea(x) > 1000 and cv2.contourArea(x) < 20000, contours))
+    contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
+    if len(contours) > 0:
+        steering_angle = avoidObstacles(contours, image, bottomAux, width, midx, height, steering_angle)
+        speed = 0
+        """
+
+    """
+    DEBUGGING STUFF
+    """
+
+    angle = 0
+    offset = 0
+
+    if show_camera:
+        try:
+            xdiff = int(math.tan(math.radians(steering_angle)) * midy)
+            bottomPoint = (midx, height)
+            navPoint = (midx + xdiff, midy)
+            cv2.line(image, bottomPoint, navPoint,
+                     (255, 50, 150), 3, cv2.LINE_AA)
+        except Exception as e:
+            print("failed to draw main navigation line: ", e)
+            pass
+
+        speedMessages = ["OBSTACLE", "TURN", "NORMAL", "TURBO"]
+        cv2.putText(image, speedMessages[speed], (10, 30),
+                    cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 0), 1, cv2.LINE_AA,)
+        cv2.imshow("res", cv2.resize(image, (600, 600)))
+        if cv2.waitKey(0) & 0xFF == ord("q"):
+            exit()
+
+    return steering_angle, speed
 
 def analyse_half(half, classified_image, image, show_camera):
     cFrame = PyFrame(classified_image)
@@ -15,8 +81,8 @@ def analyse_half(half, classified_image, image, show_camera):
 
     midx = int(width/2)
     midy = int(height/2)
-
-    cFrame.getTapePoints()
+    
+    cFrame.getTapePoints(half == "top")
     pointList = cFrame.getMidPoints()
     if show_camera:
         plot_pointlist(image, pointList, (50, 255, 50))
@@ -60,7 +126,7 @@ def analyse_half(half, classified_image, image, show_camera):
         offset = midOffset
         offset_angle = int(math.degrees(math.atan2(offset, midy)))
         steering_angle = int(
-            (offset_angle * 8 + angle * 2) / 10) * angleMultiplier
+            (offset_angle * 5 + angle * 5) / 10) * angleMultiplier
     elif blueAngle and yellowAngle:
         angle = int((blueAngle + yellowAngle)/2)
         offset = int((blueOffset + yellowOffset)/2)
@@ -104,27 +170,42 @@ def analyse_half(half, classified_image, image, show_camera):
     return steering_angle, auxInfo
 
 
-def plan_steering(classified, image, show_camera):
 
-    height = image.shape[0]
-    width = image.shape[1]
-    midx = int(width/2)
-    midy = int(height/2)
+def avoidObstacles(contours, image, bottomAux, width, midx, height, steering_angle):
+    x, y, w, h = cv2.boundingRect(contours[0])
+    cv2.rectangle(image, (x, y), (x+w,y+h), (255, 255, 0))
+    cv2.drawContours(image, contours, 0, (255, 0, 255), 0)
 
-    imagified = np.reshape(classified, (height, width))
+    blueAngle, blueOffset = bottomAux["blue"]
+    yellowAngle, yellowOffset = bottomAux["yellow"]
 
-    # split image in two
-    imagifiedTop = imagified[:int(height/2), :]
-    imagifiedBottom = imagified[int(height/2):, :]
-    imageTop = image[:int(height/2), :]
-    imageBottom = image[int(height/2):, :]
+    if not blueAngle:
+        blueOffset = -int(width/2)
+    if not yellowAngle:
+        yellowOffset = int(width/2)
 
-    # split analysis on top and bottom half
-    bottom_angle, bottomAux = analyse_half(
-        "bottom", imagifiedBottom, imageBottom, show_camera)
-    top_angle, topAux = analyse_half(
-        "top", imagifiedTop, imageTop, show_camera)
+    left_edge_offset = x - int(width/2)
+    right_edge_offset = x + w - int(width/2)
 
+    left_gap = left_edge_offset - blueOffset
+    right_gap = yellowOffset - right_edge_offset
+
+    if left_gap > right_gap:
+        avoid_offset = blueOffset + (x - midx)
+        avoid_offset = avoid_offset/2
+        angle_radians = math.atan2(avoid_offset, height - (y+h))
+        steering_angle = -40
+        #steering_angle = int(math.degrees(angle_radians)) * 2
+    else:
+        avoid_offset = yellowOffset + (x + h - midx)
+        avoid_offset = avoid_offset/2
+        angle_radians = math.atan2(avoid_offset, height - (y+h))
+        #steering_angle = int(math.degrees(angle_radians)) * 2
+        steering_angle = 40
+
+    return steering_angle
+
+def decideBehaviour(bottom_angle, top_angle):
     steering_angle = 0
     speed = 0
 
@@ -164,75 +245,6 @@ def plan_steering(classified, image, show_camera):
             speed = 2
             if(abs(steering_angle) < 15):
                 speed = 3
-
-    """
-    OBSTACLE AVOIDANCE OVERRIDE
-    """
-    """
-    red_loc = (imagified ==2).astype(int)
-    contours, _ = cv2.findContours(red_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-    #contour_sizes = list(map(cv2.contourArea, contours))
-    #print(contour_sizes)
-
-    contours = list(filter(lambda x: cv2.contourArea(x) > 4000 and cv2.contourArea(x) < 20000, contours))
-    contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
-    if len(contours) > 0:
-        x, y, w, h = cv2.boundingRect(contours[0])
-        cv2.rectangle(image, (x, y), (x+w,y+h), (255, 255, 0))
-        cv2.drawContours(image, contours, 0, (255, 0, 255), 0)
-
-        if not blueAngle:
-            blueOffset = -int(width/2)
-        if not yellowAngle:
-            yellowOffset = int(width/2)
-
-        left_edge_offset = x - int(width/2)
-        right_edge_offset = x + w - int(width/2)
-
-        left_gap = left_edge_offset - blueOffset
-        right_gap = yellowOffset - right_edge_offset
-
-
-        if left_gap > right_gap:
-            avoid_offset = blueOffset + (x - midx)
-            avoid_offset = avoid_offset/2
-            angle_radians = math.atan2(avoid_offset, height - (y+h))
-            steering_angle = -30
-            #steering_angle = int(math.degrees(angle_radians)) * 2
-        else:
-            avoid_offset = yellowOffset + (x + h - midx)
-            avoid_offset = avoid_offset/2
-            angle_radians = math.atan2(avoid_offset, height - (y+h))
-            #steering_angle = int(math.degrees(angle_radians)) * 2
-            steering_angle = 30
-
-        speed = 0
-        """
-
-    """
-    DEBUGGING STUFF
-    """
-
-    angle = 0
-    offset = 0
-    if show_camera:
-        try:
-            xdiff = int(math.tan(math.radians(steering_angle)) * midy)
-            bottomPoint = (midx, height)
-            navPoint = (midx + xdiff, midy)
-            cv2.line(image, bottomPoint, navPoint,
-                     (255, 50, 150), 3, cv2.LINE_AA)
-        except Exception as e:
-            print("failed to draw main navigation line: ", e)
-            pass
-
-        speedMessages = ["OBSTACLE", "TURN", "NORMAL", "TURBO"]
-        cv2.putText(image, speedMessages[speed], (10, 30),
-                    cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 0), 1, cv2.LINE_AA,)
-        cv2.imshow("res", cv2.resize(image, (600, 600)))
-        if cv2.waitKey(0) & 0xFF == ord("q"):
-            exit()
-
     return steering_angle, speed
 
 

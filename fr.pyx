@@ -3,6 +3,7 @@
 
 from libcpp.vector cimport vector
 from libcpp.pair cimport pair
+from libcpp cimport bool
 
 cdef extern from "Frame.h" namespace "frame":
     cdef cppclass Frame:
@@ -12,7 +13,7 @@ cdef extern from "Frame.h" namespace "frame":
         vector[pair[int, int]] darkvec
         double percentage;
         vector[pair[int, int]] getMidPoints()
-        vector[pair[int, int]] getTapePoints()
+        vector[pair[int, int]] getTapePoints(bool)
         vector[pair[int, int]] getDarkPoints()
         vector[pair[int, int]] getLightPoints()
         vector[pair[pair[int, int], pair[int, int]]] getBlueLine()
@@ -30,8 +31,8 @@ cdef class PyFrame:
     def getMidPoints(self):
         return self.thisptr.getMidPoints()
 
-    def getTapePoints(self):
-        return self.thisptr.getTapePoints()
+    def getTapePoints(self, top):
+        return self.thisptr.getTapePoints(top)
 
     def getBlueLine(self):
         return self.thisptr.getBlueLine()

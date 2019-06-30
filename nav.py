@@ -39,7 +39,7 @@ def plan_steering(classified, image, show_camera):
     contour_sizes = list(map(cv2.contourArea, contours))
     print(contour_sizes)
 
-    contours = list(filter(lambda x: cv2.contourArea(x) > 2000 and cv2.contourArea(x) < 10000, contours))
+    contours = list(filter(lambda x: cv2.contourArea(x) > 1500 and cv2.contourArea(x) < 10000, contours))
     contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
     if len(contours) > 0:
         steering_angle = avoidObstacles(contours, image, bottomAux, width, midx, height, steering_angle)
@@ -140,7 +140,7 @@ def analyse_half(half, classified_image, image, show_camera):
         offset = yellowOffset
         steering_angle = max(angle * angleMultiplier - correctionOffset, -60)
         if offset < 0:
-            steering_angle = -60
+            steering_angle = -70
     else:
         steering_angle = None
 
@@ -178,9 +178,9 @@ def avoidObstacles(contours, image, bottomAux, width, midx, height, steering_ang
     yellowAngle, yellowOffset = bottomAux["yellow"]
 
     if not blueAngle:
-        blueOffset = -int(width/2)
+        blueOffset = -int(width)
     if not yellowAngle:
-        yellowOffset = int(width/2)
+        yellowOffset = int(width)
 
     left_edge_offset = x - int(width/2)
     right_edge_offset = x + w - int(width/2)

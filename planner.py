@@ -15,7 +15,7 @@ def get_spaced_frames(filename, length, get_n):
 
     filepath = os.path.join("footage", filename)
     print(f"From a file of {length} frames we want {get_n} frames")
-    spacing = int((length-100)/get_n)
+    spacing = int((length-100)/(get_n*2))
     print("Spacing: ", spacing)
 
     # initialise loop
@@ -112,7 +112,7 @@ def collect_points(filename=None):
 
     # for each frame ask for blue points, yellow points and ground points
     gap()
-    for colour in ["blue", "red", "yellow", "other"]:
+    for colour in ["blue", "red", "yellow", "green", "purple", "other"]:
         Classifier = HMI(colour)
         total_data = pd.DataFrame()
 

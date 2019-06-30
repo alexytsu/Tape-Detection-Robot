@@ -17,7 +17,7 @@ def plan_steering(classified, image, show_camera):
     imagified = np.reshape(classified, (height, width))
 
     # split image in two
-    divider = int(3*height/4)
+    divider = int(3*height/6)
     imagifiedTop = imagified[:divider, :]
     imagifiedBottom = imagified[divider:, :]
     imageTop = image[:divider, :]
@@ -34,18 +34,16 @@ def plan_steering(classified, image, show_camera):
     """
     OBSTACLE AVOIDANCE OVERRIDE
     """
-    """
     red_loc = (imagified ==2).astype(int)
     contours, _ = cv2.findContours(red_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     contour_sizes = list(map(cv2.contourArea, contours))
     print(contour_sizes)
 
-    contours = list(filter(lambda x: cv2.contourArea(x) > 1000 and cv2.contourArea(x) < 20000, contours))
+    contours = list(filter(lambda x: cv2.contourArea(x) > 2000 and cv2.contourArea(x) < 10000, contours))
     contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
     if len(contours) > 0:
         steering_angle = avoidObstacles(contours, image, bottomAux, width, midx, height, steering_angle)
         speed = 0
-        """
 
     """
     DEBUGGING STUFF
@@ -69,7 +67,7 @@ def plan_steering(classified, image, show_camera):
         cv2.putText(image, speedMessages[speed], (10, 30),
                     cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 0), 1, cv2.LINE_AA,)
         cv2.imshow("res", cv2.resize(image, (600, 600)))
-        if cv2.waitKey(0) & 0xFF == ord("q"):
+        if cv2.waitKey(1) & 0xFF == ord("q"):
             exit()
 
     return steering_angle, speed
@@ -126,7 +124,7 @@ def analyse_half(half, classified_image, image, show_camera):
         offset = midOffset
         offset_angle = int(math.degrees(math.atan2(offset, midy)))
         steering_angle = int(
-            (offset_angle * 5 + angle * 5) / 10) * angleMultiplier
+            (offset_angle * 7 + angle * 3) / 10) * angleMultiplier
     elif blueAngle and yellowAngle:
         angle = int((blueAngle + yellowAngle)/2)
         offset = int((blueOffset + yellowOffset)/2)
@@ -134,15 +132,15 @@ def analyse_half(half, classified_image, image, show_camera):
     elif blueAngle:
         angle = int(blueAngle)
         offset = blueOffset
-        steering_angle = min(angle * angleMultiplier + correctionOffset, 50)
+        steering_angle = min(angle * angleMultiplier + correctionOffset, 60)
         if offset > 0:
-            steering_angle = 50
+            steering_angle = 60
     elif yellowAngle:
         angle = int(yellowAngle)
         offset = yellowOffset
-        steering_angle = max(angle * angleMultiplier - correctionOffset, -50)
+        steering_angle = max(angle * angleMultiplier - correctionOffset, -60)
         if offset < 0:
-            steering_angle = -50
+            steering_angle = -60
     else:
         steering_angle = None
 
@@ -231,7 +229,7 @@ def decideBehaviour(bottom_angle, top_angle):
             speed = 1
     else:
         # both tapes    
-        steering_angle = bottom_angle
+        steering_angle = (bottom_angle + top_angle)/2
         swerve = top_angle * bottom_angle < 0
         largeDiff = abs(top_angle - bottom_angle) > 30
 

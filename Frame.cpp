@@ -30,7 +30,7 @@ vector<pair<int, int>> Frame::getTapePoints(bool top)
 
 
         uint32_t width = arr[0].size();
-        uint16_t limit = width/2;
+        uint16_t limit = width/4;
         if (top == true) limit = 0;
 
 

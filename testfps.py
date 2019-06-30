@@ -11,7 +11,7 @@ from nav import plan_steering
 from car import Car
 
 
-video = WebcamVideoStream(4).start()
+video = WebcamVideoStream(0).start()
 
 while True:
     prev_frame = 0

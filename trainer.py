@@ -12,7 +12,6 @@ from sklearn.naive_bayes import GaussianNB
 from sklearn.gaussian_process import GaussianProcessClassifier
 from sklearn.gaussian_process.kernels import RBF
 from sklearn.neighbors import KNeighborsClassifier
-from sklearn.tree import DecisionTreeClassifier
 
 from utility import choose_file
 
@@ -73,8 +72,6 @@ def train_classifier(data_folder, classifier_name):
         classifier = GaussianProcessClassifier(1.0 * RBF(1.0))
     elif classifier_name == "forest":
         classifier = RandomForestClassifier(n_estimators=100)
-    elif classifier_name == "decision":
-        classifier = DecisionTreeClassifier(max_depth=25)
     else:
         print("NO VALID CLASSIFIER SELECTED")
         exit()

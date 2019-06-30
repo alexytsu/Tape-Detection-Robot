@@ -26,18 +26,6 @@ def show_masks(ynew, image, name, w, h):
         col = loc % image.shape[1]
         image[row][col] = (0, 0, 0)
 
-    roi = np.where(ynew == 5)[0]
-    for loc in roi:
-        row = int(loc / image.shape[1])
-        col = loc % image.shape[1]
-        image[row][col] = (50, 255, 20)
-
-    roi = np.where(ynew == 6)[0]
-    for loc in roi:
-        row = int(loc / image.shape[1])
-        col = loc % image.shape[1]
-        image[row][col] = (255, 50, 200)
-
     image = cv2.resize(image, (w, h))
     return image
 

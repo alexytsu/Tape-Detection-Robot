@@ -197,14 +197,14 @@ def avoidObstacles(contours, image, bottomAux, width, midx, height, steering_ang
         avoid_offset = blueOffset + (x - midx)
         avoid_offset = avoid_offset/2
         angle_radians = math.atan2(avoid_offset, height - (y+h))
-        steering_angle = -40
+        steering_angle = -50
         #steering_angle = int(math.degrees(angle_radians)) * 2
     else:
         avoid_offset = yellowOffset + (x + h - midx)
         avoid_offset = avoid_offset/2
         angle_radians = math.atan2(avoid_offset, height - (y+h))
         #steering_angle = int(math.degrees(angle_radians)) * 2
-        steering_angle = 40
+        steering_angle = 50
 
     return steering_angle
 
@@ -234,7 +234,8 @@ def decideBehaviour(bottom_angle, top_angle):
             speed = 1
     else:
         # both tapes    
-        steering_angle = (bottom_angle + top_angle)/2
+        # tune
+        steering_angle = (2*bottom_angle + top_angle)/3
         swerve = top_angle * bottom_angle < 0
         largeDiff = abs(top_angle - bottom_angle) > 30
 
@@ -261,7 +262,7 @@ class AngleBuffer():
         self.current = angle
 
     def get_angle(self):
-        return int((previous + 3 * current)/4)
+        return int((previous + current)/2)
 
 
 def getLineAttributes(line, width, height):
@@ -299,7 +300,7 @@ def analyseLineScatter(image, pointList, height, width):
     houghLines = []
 
     # LOWER NUMBER === MOREEE SPAGHETTIIII
-    SPAGHETTI = 20
+    SPAGHETTI = 12
 
     lines = cv2.HoughLines(blank_image, 4, np.pi / 200, SPAGHETTI, None, 0, 0)
     if lines is not None:

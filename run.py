@@ -49,7 +49,7 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
         send_speed = 26000
         TURBO_SPEED = 26380
         NORMAL_SPEED = 26280
-        TURNING_SPEED = 26180
+        TURNING_SPEED = 26050
         OBSTACLE_SPEED = 28000
 
         if speed == 0:
@@ -61,7 +61,7 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
         elif speed == 3:
             send_speed = TURBO_SPEED
 
-        CAR.SendThrottle(send_speed)
+        CAR.SendThrottle(send_speed + 200)
 
         # ============ PRINT DEBUGGING INFORMATION
         end_time = time.time()

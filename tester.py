@@ -24,10 +24,7 @@ SER = None
 MAPPING = None
 TRANSLATION = None
 CROP = None
-CAMERA = True
-
-go = 95
-
+CAMERA = False
 
 def test_model(color_table, filename=None):
 
@@ -42,12 +39,12 @@ def test_model(color_table, filename=None):
         video = cv2.VideoCapture(os.path.join("footage", filename))
 
     frame_n = 0
-    smoother = AngleBuffer(1)
+    smoother = AngleBuffer()
     while True:
         frame = None
         if CAMERA:
             frame, thread_frame_number = video.read()
-            #frame = applyIPT(frame, MAPPING, TRANSLATION, CROP)
+            # frame = applyIPT(frame, MAPPING, TRANSLATION, CROP)
         else:
             retval, frame = video.read()
             if not retval:
@@ -68,18 +65,16 @@ def test_model(color_table, filename=None):
         # frame = edges & frame
 
         full_ynew = mask_lookup(frame, color_table)
+        """
         mask_image = show_masks(full_ynew, frame, "full", w, h)
+        cv2.imshow("mask", mask_image)
+        """
 
-        horizontal1 = np.concatenate((original, mask_image), axis=1)
-        horizontal2 = np.concatenate((edges, frame), axis=1)
-        total = np.concatenate((horizontal1, horizontal2), axis=0)
-
-        cv2.imshow("debug", total)
 
         # classify
         other_ynew = mask_lookup(frame, color_table)
 
-        angle,speed = plan_steering(other_ynew, frame, None, None, True)
+        angle,speed = plan_steering(other_ynew, frame, True)
 
     print("fin")
 
@@ -95,6 +90,7 @@ if __name__ == "__main__":
         SER = getSerialPort()
     except:
         SER = None
+
 
 
     ipm_file = open('../IPMtest/source/homographyMatrix.p', 'rb')

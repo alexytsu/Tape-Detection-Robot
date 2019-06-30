@@ -14,12 +14,13 @@ class WebcamVideoStream:
     def __init__(self, src=0):
         self.stream = cv2.VideoCapture(src)
         self.stream.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc('M', 'J', 'P', 'G'))
-        self.stream.set(cv2.CAP_PROP_FPS, 60)
         self.stream.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
         self.stream.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+        self.stream.set(cv2.CAP_PROP_FPS, 60)
         (self.grabbed, self.frame) = self.stream.read()
         self.stopped = False
         self.frame_number = 0
+        self.last_sent = 0
 
     def start(self):
         print("starting camera...")
@@ -33,7 +34,8 @@ class WebcamVideoStream:
                 return
 
             (self.grabbed, self.frame) = self.stream.read()
-            self.frame_number += 1
+            if(self.grabbed):
+                self.frame_number += 1
 
     def read(self):
         return self.frame, self.frame_number

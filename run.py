@@ -12,10 +12,12 @@ from car import Car
 ARGS = None
 
 def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, car):
+
     prev_frame = 0
     lastRealFrame = time.time()
-    while True:
 
+    while True:
+        # ============= DECODE THE VIDEO FRAME
         start_time = time.time()
         frame, frame_n = video.read()
 
@@ -31,45 +33,37 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
         if frame is None:
             print("Pass")
             continue
+
+        # ============= RESIZE AND FLATTEN THE FRAME
         frame = cv2.resize(frame, (320, 240), interpolation = cv2.INTER_AREA)
         tape_frame = applyIPT(frame, mapping, translation, crop)
 
-	
-        # further_frame = applyIPT(frame, mapping, translation, crop_other)
-        
-        # resize the navigation frame
-        """
-        w = 100
-        h = 100
-        tape_frame = cv2.resize(tape_frame, (w, h))
-        """
-    
-        # preprocess
-        """
-        tape_edges = get_edges(tape_frame, ARGS.debug_camera) 
-        tape_edges = cv2.cvtColor(tape_edges, cv2.COLOR_GRAY2BGR)
-        tape_frame = tape_edges & tape_frame
-        """
-
-        # classify
+        # ============= CLASSIFY THE COLORS
         colors = mask_lookup(tape_frame, color_lookup)
-        # other_colors = mask_lookup(further_frame, color_lookup)
 
-        # analyse tape and get a steering direction
-        angle, speed = plan_steering(colors, tape_frame, None, None, ARGS.show_camera)
-        ## SendSpeed(arduino, int(angle), speed)
-        CAR.SendSteering(int(angle  - 3))
-        STRAIGHT_SPEED = 26380
+        # ============= MAKE A STEERING DECISION
+        angle, speed = plan_steering(colors, tape_frame, ARGS.show_camera)
+
+        # ============= CONTROL THE CAR
+        CAR.SendSteering(int(angle))
+        send_speed = 26000
+        TURBO_SPEED = 26450
+        NORMAL_SPEED = 26380
+        TURNING_SPEED = 26180
         OBSTACLE_SPEED = 26100
+
         if speed == 0:
-            speed = OBSTACLE_SPEED
-        else:
-            speed = STRAIGHT_SPEED
-            if(abs(angle) > 15):
-                speed = 26150
-        CAR.SendThrottle(speed)
+            send_speed = OBSTACLE_SPEED
+        elif speed == 1:
+            send_speed = TURNING_SPEED
+        elif speed == 2:
+            send_speed = NORMAL_SPEED
+        elif speed == 3:
+            send_speed = TURBO_SPEED
 
+        CAR.SendThrottle(send_speed)
 
+        # ============ PRINT DEBUGGING INFORMATION
         end_time = time.time()
         if ARGS.debug_text:
             print(f"Processing FPS: {1/(end_time - start_time):.2f}")

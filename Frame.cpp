@@ -8,7 +8,7 @@ Frame::Frame(vector<vector<double>> f)
 {
     arr = f;
     // percentage of the frame to consider for navigation purposes
-    percentage = 0.5;
+    percentage = 1;
 }
 
 Frame::~Frame()
@@ -31,16 +31,19 @@ vector<pair<int, int>> Frame::getTapePoints()
         uint32_t width = arr[0].size();
         for (uint32_t j = 0; j < width; j++)
         {
-            if (arr[i][j] == 1 && j < 2*width/3)
+
+            if (arr[i][j] == 1)
             {
                 n_dark++;
                 dark_j += j;
             }
-            if (arr[i][j] == 3 && j > width/3)
+
+            if (arr[i][j] == 3)
             {
                 n_light++;
                 light_j += j;
             }
+
         }
 
         if(n_dark != 0 && n_light != 0) {
@@ -57,8 +60,6 @@ vector<pair<int, int>> Frame::getTapePoints()
             }
         }
 }
-
-        
 
         if (n_dark != 0)
         {

@@ -65,16 +65,15 @@ def test_model(color_table, filename=None):
         # frame = edges & frame
 
         full_ynew = mask_lookup(frame, color_table)
-        """
         mask_image = show_masks(full_ynew, frame, "full", w, h)
         cv2.imshow("mask", mask_image)
-        """
+        cv2.waitKey(0)
 
 
         # classify
         other_ynew = mask_lookup(frame, color_table)
 
-        angle,speed = plan_steering(other_ynew, frame, True)
+        angle,speed = plan_steering(other_ynew, frame, False)
 
     print("fin")
 

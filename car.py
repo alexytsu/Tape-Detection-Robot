@@ -45,7 +45,9 @@ class Car():
         ser.write((('F${}{}{}').format(chr(byteH),chr(byteL),chr(checksum))).encode('utf-8')) #format into ascii string and then write to port
 
     def SendThrottle(self,val):
-        self.write(val,self.Throttle)
+        if(val >= 90):
+            val = 90
+        self.Throttle.write(chr(int(val)).encode('utf-8'))
 
     def SendSteering(self,val):
         angle = 90 + val
@@ -53,13 +55,14 @@ class Car():
         angle = min(125, angle)
         self.write(angle,self.Steering)
 
-    def Sync(self):
+    def SyncServo(self):
         counter = 0
         for val in range(100):
             if(val%2==0):
                 test = '/dev/ttyUSB{}'
             else:
-                test = '/dev/ttyACM{}'
+            #    test = '/dev/ttyACM{}'
+                pass
             input = test.format(counter)
             if(val%2==1):
                 counter+=1
@@ -68,12 +71,39 @@ class Car():
                 print("connected to", input)
                 self.findHeader(ser)
                 self.found+=1
-                if(self.found >= 2):
+                if(self.found >= 1):
                     return 
             except Exception as e:
                 print(e)
                 print("Trying: ", input)
                 time.sleep(1)
+    
+    def SyncThrottle(self):
+        counter = 0
+        for val in range(100):
+            if(val%2==0):
+                #test = '/dev/ttyUSB{}'
+                pass
+            else:
+                test = '/dev/ttyACM{}'
+                pass
+            input = test.format(counter)
+            if(val%2==1):
+                counter+=1
+            try:
+                ser = serial.Serial(input)
+                ser.baudrate = 115200
+                self.Throttle = ser
+                print("connected to", input)
+                    return 
+            except Exception as e:
+                print(e)
+                print("Trying: ", input)
+                time.sleep(1)
+        
+    def Sync(self):
+        self.SyncServo()
+        self.SyncThrottle()
     
     def everything(self):
         print("Send Everything")

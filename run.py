@@ -47,9 +47,9 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
         if saw_tape:
             tape_count += 2
             if tape_count >= 7:
-                CAR.SendThrottle(25000)
-                CAR.SendThrottle(25000)
-                CAR.SendThrottle(25000)
+                CAR.SendThrottle(0)
+                CAR.SendThrottle(0)
+                CAR.SendThrottle(0)
                 video.stop()
                 exit()
         else:
@@ -60,11 +60,11 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
 
         # ============= CONTROL THE CAR
         CAR.SendSteering(int(angle))
-        send_speed = 26000
-        TURBO_SPEED = 26420
-        NORMAL_SPEED = 26320
-        TURNING_SPEED = 26200
-        OBSTACLE_SPEED = 28000
+        send_speed = 10
+        TURBO_SPEED = 30
+        NORMAL_SPEED = 20
+        TURNING_SPEED = 25
+        OBSTACLE_SPEED = 40
 
         if speed == 0:
             send_speed = OBSTACLE_SPEED

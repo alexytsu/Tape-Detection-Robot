@@ -49,9 +49,13 @@ def plan_steering(classified, image, show_camera):
     DEBUGGING STUFF
     """
 
+    saw_tape = False
     stop_loc = (imagified == 5).astype(int)
     contours, _ = cv2.findContours(stop_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
+    contour_sizes = list(map(cv2.contourArea, contours))
+    cv2.drawContours(image, contours, -1, (200, 30, 30), 0)
+
 
 
     angle = 0
@@ -75,7 +79,7 @@ def plan_steering(classified, image, show_camera):
         if cv2.waitKey(1) & 0xFF == ord("q"):
             exit()
 
-    return steering_angle, speed
+    return steering_angle, speed, saw_tape
 
 def analyse_half(half, classified_image, image, show_camera):
     cFrame = PyFrame(classified_image)

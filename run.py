@@ -42,7 +42,7 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
         colors = mask_lookup(tape_frame, color_lookup)
 
         # ============= MAKE A STEERING DECISION
-        angle, speed = plan_steering(colors, tape_frame, ARGS.show_camera)
+        angle, speed, saw_tape = plan_steering(colors, tape_frame, ARGS.show_camera)
 
         # ============= CONTROL THE CAR
         CAR.SendSteering(int(angle))

@@ -23,12 +23,8 @@ def train_classifier(data_folder, classifier_name):
     Red = pd.read_csv(red_raw)
     yellow_raw = os.path.join("training_data", data_folder, "yellow.csv")
     Yellow = pd.read_csv(yellow_raw)
-    green_raw = os.path.join("training_data", data_folder, "green.csv")
-    Green = pd.read_csv(green_raw)
     other_raw = os.path.join("training_data", data_folder, "other.csv")
     Other = pd.read_csv(other_raw)
-    purple_raw = os.path.join("training_data", data_folder, "purple.csv")
-    Purple = pd.read_csv(purple_raw)
 
     X = []
     Hues = []
@@ -50,14 +46,6 @@ def train_classifier(data_folder, classifier_name):
     for i, x in Other.iterrows():
         X.append([x.H, x.S])
         y.append(4)
-
-    for i, x in Green.iterrows():
-        X.append([x.H, x.S])
-        y.append(5)
-    
-    for i, x in Purple.iterrows():
-        X.append([x.H, x.S])
-        y.append(6)
 
     # classifier = RandomForestClassifier(max_depth=5, n_estimators=5, max_features=1)
 

@@ -47,6 +47,17 @@ for i, x in Other.iterrows():
     colors.append("black")
 
 
+try:
+    green_raw = os.path.join("training_data", data_folder, "green.csv")
+    Green = pd.read_csv(green_raw)
+    for i, x in Green.iterrows():
+        X.append(x.H)
+        Y.append(x.S)
+        colors.append("green")
+except:
+    pass
+
+
 f = plt.figure(1)
 plt.scatter(X, Y, c=colors)
 plt.xlabel("Hue")
@@ -80,50 +91,44 @@ plt.ylabel("Sat")
 g.show()
 
 
-modify_lookup = input("modify lookup? y or n")
-if modify_lookup == 'y':
-    cutoff = int(input("sat_cutoff: "))
-    yellow_lower = int(input("yellow_lower_cutoff: "))
-    yellow_higher = int(input("yellow_higher_cutoff: "))
-    blue_lower = int(input("blue_lower_cutoff: "))
-    blue_higher = int(input("blue_higher_cutoff: "))
-    red_lower = int(input("red_lower_cutoff: "))
-    red_higher = int(input("red_higher_cutoff: "))
+while True:
+    modify_lookup = input("modify lookup? y or n")
+    if modify_lookup == 'y':
+        sat_lower = int(input("sat_lower_cutoff: "))
+        sat_higher = int(input("sat_higher_cutoff: "))
+        hue_lower = int(input("hue_lower: "))
+        hue_higher = int(input("hue_higher: "))
+        color = int(input("color: "))
 
-    lookupTable[:,:] = 4
-    lookupTable[cutoff:,blue_lower:blue_higher] = 1
-    lookupTable[cutoff:,red_lower:red_higher] = 2
-    lookupTable[cutoff:,yellow_lower:yellow_higher] = 3
+        lookupTable[sat_lower:sat_higher,hue_lower:hue_higher] = color
 
-    lookupX = []
-    lookupY = []
-    lookupColors = []
+        lookupX = []
+        lookupY = []
+        lookupColors = []
 
 
-    for sat, row in enumerate(lookupTable):
-        for hue, col in enumerate(row):
-            lookupX.append(hue)
-            lookupY.append(sat)
-            if col == 1:
-                lookupColors.append("blue")
-            elif col == 2:
-                lookupColors.append("red")
-            elif col == 3:
-                lookupColors.append("yellow")
-            else:
-                lookupColors.append("black")
+        for sat, row in enumerate(lookupTable):
+            for hue, col in enumerate(row):
+                lookupX.append(hue)
+                lookupY.append(sat)
+                if col == 1:
+                    lookupColors.append("blue")
+                elif col == 2:
+                    lookupColors.append("red")
+                elif col == 3:
+                    lookupColors.append("yellow")
+                elif col == 4:
+                    lookupColors.append("black")
+                elif col == 5:
+                    lookupColors.append("green")
 
-    h = plt.figure(3)
-    plt.scatter(lookupX, lookupY, c=lookupColors)
-    plt.xlabel("Hue")
-    plt.ylabel("Sat")
-    h.show()
+        h = plt.figure(3)
+        plt.scatter(lookupX, lookupY, c=lookupColors)
+        plt.xlabel("Hue")
+        plt.ylabel("Sat")
+        h.show()
 
-    fout = open("LOOKUP.pkl", "wb")
-    pickle.dump(lookupTable, fout)
-
-
-    input()
-
-else:
-    exit()
+        fout = open("LOOKUP.pkl", "wb")
+        pickle.dump(lookupTable, fout)
+    else:
+        exit()

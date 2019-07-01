@@ -7,6 +7,15 @@ import numpy as np
 from fr import PyFrame
 from helper import writeLineAttributes
 
+def get_box_ratio(box):
+    a, b, c, d = box
+    a1, a2 = a
+    b1, b2 = b
+    c1, c2 = c
+    dist_1 = math.sqrt((a1-b1) ** 2 + (a2 - b2) ** 2)
+    dist_2 = math.sqrt((c1 - b1) ** 2 + (c2-b2)**2)
+    return max(dist_1/dist_2, dist_2/dist_1)
+
 def plan_steering(classified, image, show_camera):
 
     height = image.shape[0]
@@ -58,10 +67,18 @@ def plan_steering(classified, image, show_camera):
     contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
     contour_sizes = list(map(cv2.contourArea, contours))
     print(contour_sizes)
-    contours = list(filter(lambda x: cv2.contourArea(x) > 500 and cv2.contourArea(x) < 2000, contours))
+    contours = list(filter(lambda x: cv2.contourArea(x) > 300 and cv2.contourArea(x) < 1500, contours))
     cv2.drawContours(image, contours, -1, (200, 30, 30), 0)
     if len(contours) > 0:
-        saw_tape = True
+        rectangles = list(map(cv2.minAreaRect, contours))
+        boxes = list(map(cv2.boxPoints, rectangles))
+        boxes = list(map(np.int0, boxes))
+        boxes = sorted(boxes, key=get_box_ratio, reverse=True)
+        ratios = list(map(get_box_ratio, boxes))
+        print(ratios)
+        ratio = get_box_ratio(boxes[0])
+        if ratio >= 8:
+            saw_tape = True
 
 
 

@@ -46,7 +46,7 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
         angle, speed, saw_tape = plan_steering(colors, tape_frame, ARGS.show_camera)
         if saw_tape:
             tape_count += 2
-            if tape_count >= 7:
+            if tape_count >= 3:
                 CAR.SendThrottle(0)
                 CAR.SendThrottle(0)
                 CAR.SendThrottle(0)
@@ -61,10 +61,10 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
         # ============= CONTROL THE CAR
         CAR.SendSteering(int(angle))
         send_speed = 10
-        TURBO_SPEED = 30
-        NORMAL_SPEED = 20
-        TURNING_SPEED = 25
-        OBSTACLE_SPEED = 40
+        TURBO_SPEED = 40
+        NORMAL_SPEED = 35
+        TURNING_SPEED = 30
+        OBSTACLE_SPEED = 70
 
         if speed == 0:
             send_speed = OBSTACLE_SPEED
@@ -117,6 +117,7 @@ if __name__ == "__main__":
     except Exception as e:
         print(e)
         CAR = None
+        exit()
 
     COLOR_LOOKUP = get_color_lookup() # load the trained color table
     MAPPING, TRANSLATION, CROP, CROP_OTHER = get_perspective_warp() # load the camera transforms

@@ -58,12 +58,11 @@ class Car():
     def SyncServo(self):
         counter = 0
         for val in range(100):
-            if(val%2==0):
-                test = '/dev/ttyUSB{}'
-            else:
-            #    test = '/dev/ttyACM{}'
-                pass
-            input = test.format(counter)
+            
+            test = '/dev/ttyUSB{}'
+            
+            
+            input = test.format(val)
             if(val%2==1):
                 counter+=1
             try:
@@ -81,13 +80,8 @@ class Car():
     def SyncThrottle(self):
         counter = 0
         for val in range(100):
-            if(val%2==0):
-                #test = '/dev/ttyUSB{}'
-                pass
-            else:
-                test = '/dev/ttyACM{}'
-                pass
-            input = test.format(counter)
+            test = '/dev/ttyACM{}'
+            input = test.format(val)
             if(val%2==1):
                 counter+=1
             try:
@@ -95,7 +89,7 @@ class Car():
                 ser.baudrate = 115200
                 self.Throttle = ser
                 print("connected to", input)
-                    return 
+                return 
             except Exception as e:
                 print(e)
                 print("Trying: ", input)

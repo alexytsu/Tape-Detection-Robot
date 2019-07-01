@@ -36,8 +36,8 @@ def plan_steering(classified, image, show_camera):
     """
     red_loc = (imagified ==2).astype(int)
     contours, _ = cv2.findContours(red_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-    contour_sizes = list(map(cv2.contourArea, contours))
-    print(contour_sizes)
+    #contour_sizes = list(map(cv2.contourArea, contours))
+    #print(contour_sizes)
 
     contours = list(filter(lambda x: cv2.contourArea(x) > 1500 and cv2.contourArea(x) < 10000, contours))
     contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
@@ -49,12 +49,19 @@ def plan_steering(classified, image, show_camera):
     DEBUGGING STUFF
     """
 
+    """
+    STOPPING STUFF
+    """
     saw_tape = False
     stop_loc = (imagified == 5).astype(int)
     contours, _ = cv2.findContours(stop_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
     contour_sizes = list(map(cv2.contourArea, contours))
+    print(contour_sizes)
+    contours = list(filter(lambda x: cv2.contourArea(x) > 500 and cv2.contourArea(x) < 2000, contours))
     cv2.drawContours(image, contours, -1, (200, 30, 30), 0)
+    if len(contours) > 0:
+        saw_tape = True
 
 
 

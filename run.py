@@ -16,6 +16,7 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
     prev_frame = 0
     lastRealFrame = time.time()
 
+    tape_count = 0
     while True:
         # ============= DECODE THE VIDEO FRAME
         start_time = time.time()
@@ -43,15 +44,26 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
 
         # ============= MAKE A STEERING DECISION
         angle, speed, saw_tape = plan_steering(colors, tape_frame, ARGS.show_camera)
+        if saw_tape:
+            tape_count += 2
+            if tape_count >= 7:
+                CAR.SendThrottle(25000)
+                CAR.SendThrottle(25000)
+                CAR.SendThrottle(25000)
+                video.stop()
+                exit()
+        else:
+            tape_count -= 1
+            tape_count = max(0, tape_count)
+        print("tape_count: ", tape_count)
 
-        print(angle)
 
         # ============= CONTROL THE CAR
         CAR.SendSteering(int(angle))
         send_speed = 26000
-        TURBO_SPEED = 26380
-        NORMAL_SPEED = 26280
-        TURNING_SPEED = 26050
+        TURBO_SPEED = 26420
+        NORMAL_SPEED = 26320
+        TURNING_SPEED = 26200
         OBSTACLE_SPEED = 28000
 
         if speed == 0:
@@ -63,7 +75,10 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
         elif speed == 3:
             send_speed = TURBO_SPEED
 
-        CAR.SendThrottle(send_speed + 200)
+        if saw_tape:
+            send_speed = TURNING_SPEED
+
+        CAR.SendThrottle(send_speed)
 
         # ============ PRINT DEBUGGING INFORMATION
         end_time = time.time()

@@ -304,9 +304,9 @@ def analyseLineScatter(image, pointList, height, width):
     houghLines = []
 
     # LOWER NUMBER === MOREEE SPAGHETTIIII
-    SPAGHETTI = 12
+    SPAGHETTI = 16
 
-    lines = cv2.HoughLines(blank_image, 4, np.pi / 200, SPAGHETTI, None, 0, 0)
+    lines = cv2.HoughLines(blank_image, 2, np.pi / 200, SPAGHETTI, None, 0, 0)
     if lines is not None:
         for i in range(0, len(lines)):
             rho = lines[i][0][0]

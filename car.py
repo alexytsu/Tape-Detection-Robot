@@ -49,7 +49,7 @@ class Car():
 
     def SendSteering(self,val):
         angle = 90 + val
-        angle = max(60, angle)
+        angle = max(55, angle)
         angle = min(125, angle)
         self.write(angle,self.Steering)
 

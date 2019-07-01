@@ -44,6 +44,8 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
         # ============= MAKE A STEERING DECISION
         angle, speed, saw_tape = plan_steering(colors, tape_frame, ARGS.show_camera)
 
+        print(angle)
+
         # ============= CONTROL THE CAR
         CAR.SendSteering(int(angle))
         send_speed = 26000

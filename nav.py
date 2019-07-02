@@ -63,22 +63,7 @@ def plan_steering(classified, image, show_camera):
     """
     saw_tape = False
     stop_loc = (imagified == 5).astype(int)
-    contours, _ = cv2.findContours(stop_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-    contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
-    contour_sizes = list(map(cv2.contourArea, contours))
-    print(contour_sizes)
-    contours = list(filter(lambda x: cv2.contourArea(x) > 300 and cv2.contourArea(x) < 1500, contours))
-    cv2.drawContours(image, contours, -1, (200, 30, 30), 0)
-    if len(contours) > 0:
-        rectangles = list(map(cv2.minAreaRect, contours))
-        boxes = list(map(cv2.boxPoints, rectangles))
-        boxes = list(map(np.int0, boxes))
-        boxes = sorted(boxes, key=get_box_ratio, reverse=True)
-        ratios = list(map(get_box_ratio, boxes))
-        print(ratios)
-        ratio = get_box_ratio(boxes[0])
-        if ratio >= 8:
-            saw_tape = True
+    saw_tape = did_we_see_tape(stop_loc, image, saw_tape)
 
 
 
@@ -104,6 +89,26 @@ def plan_steering(classified, image, show_camera):
             exit()
 
     return steering_angle, speed, saw_tape
+
+def did_we_see_tape(stop_loc, image):
+    STOPPING_RATIO = 8
+    contours, _ = cv2.findContours(stop_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
+    contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
+    contour_sizes = list(map(cv2.contourArea, contours))
+    print(contour_sizes)
+    contours = list(filter(lambda x: cv2.contourArea(x) > 300 and cv2.contourArea(x) < 1500, contours))
+    cv2.drawContours(image, contours, -1, (200, 30, 30), 0)
+    if len(contours) > 0:
+        rectangles = list(map(cv2.minAreaRect, contours))
+        boxes = list(map(cv2.boxPoints, rectangles))
+        boxes = list(map(np.int0, boxes))
+        boxes = sorted(boxes, key=get_box_ratio, reverse=True)
+        ratios = list(map(get_box_ratio, boxes))
+        print(ratios)
+        ratio = get_box_ratio(boxes[0])
+        if ratio >= STOPPING_RATIO:
+            return True
+    return False
 
 def analyse_half(half, classified_image, image, show_camera):
     cFrame = PyFrame(classified_image)
@@ -210,11 +215,20 @@ def avoidObstacles(contours, image, bottomAux, width, midx, height, steering_ang
     blueAngle, blueOffset = bottomAux["blue"]
     yellowAngle, yellowOffset = bottomAux["yellow"]
 
+    # top half obstacle = smallest gap
     if not blueAngle:
         blueOffset = -int(width)
     if not yellowAngle:
         yellowOffset = int(width)
 
+    # bottom half always away from tape
+    if y + h > height / 2:
+        if not blueAngle:
+            blueOffset = -int(width/2)
+        if not yellowAngle:
+            yellowOffset = int(width/2)
+
+    # box edges
     left_edge_offset = x - int(width/2)
     right_edge_offset = x + w - int(width/2)
 

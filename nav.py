@@ -63,7 +63,7 @@ def plan_steering(classified, image, show_camera):
     """
     saw_tape = False
     stop_loc = (imagified == 5).astype(int)
-    saw_tape = did_we_see_tape(stop_loc, image, saw_tape)
+    saw_tape = did_we_see_tape(stop_loc, image)
 
 
 

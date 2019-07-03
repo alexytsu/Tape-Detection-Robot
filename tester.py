@@ -74,7 +74,7 @@ def test_model(color_table, filename=None):
         # classify
         other_ynew = mask_lookup(frame, color_table)
 
-        angle,speed = plan_steering(other_ynew, frame, True)
+        angle, speed, saw_end = plan_steering(other_ynew, frame, True)
 
     print("fin")
 

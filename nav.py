@@ -153,9 +153,9 @@ def analyse_half(half, classified_image, image, show_camera):
     steering_angle = 0
     speed = 0
 
-    # stuff to tune
-    angleMultiplier = 2
-    correctionOffset = 30
+    # TUNE STEERING
+    angleMultiplier = 1.5
+    correctionOffset = 20
 
     if midAngle:
         angle = int(midAngle)

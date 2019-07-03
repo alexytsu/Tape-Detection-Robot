@@ -61,9 +61,9 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
         # ============= CONTROL THE CAR
         CAR.SendSteering(int(angle))
         send_speed = 10
-        TURBO_SPEED = 40
-        NORMAL_SPEED = 35
-        TURNING_SPEED = 30
+        TURBO_SPEED = 45
+        NORMAL_SPEED = 40
+        TURNING_SPEED = 25
         OBSTACLE_SPEED = 70
 
         if speed == 0:
@@ -123,6 +123,7 @@ if __name__ == "__main__":
     MAPPING, TRANSLATION, CROP, CROP_OTHER = get_perspective_warp() # load the camera transforms
     STREAM = WebcamVideoStream(ARGS.camera).start()
     print("Initialised all")
+    input("press enter to start:")
     run(STREAM, SER, COLOR_LOOKUP, MAPPING, TRANSLATION, CROP, CROP_OTHER, CAR)
     # Thread(target=run, args=(STREAM, SER, COLOR_LOOKUP, MAPPING, TRANSLATION, CROP,CROP_OTHER,CAR)).start()
 

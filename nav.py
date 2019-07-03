@@ -48,10 +48,10 @@ def plan_steering(classified, image, show_camera):
     """
     red_loc = (imagified ==2).astype(int)
     contours, _ = cv2.findContours(red_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
-    #contour_sizes = list(map(cv2.contourArea, contours))
-    #print(contour_sizes)
+    # contour_sizes = list(map(cv2.contourArea, contours))
+    # print(contour_sizes)
 
-    contours = list(filter(lambda x: cv2.contourArea(x) > 1500 and cv2.contourArea(x) < 30000, contours))
+    contours = list(filter(lambda x: cv2.contourArea(x) > 1200 and cv2.contourArea(x) < 30000, contours))
     contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
     if len(contours) > 0:
         steering_angle = avoidObstacles(contours, image, bottomAux, width, midx, height, steering_angle)
@@ -95,18 +95,19 @@ def plan_steering(classified, image, show_camera):
 def get_contour_centroid(cnt):
     M = cv2.moments(cnt)
     cX = int(M["m10"] / M["m00"])
-    return cX
+    cY = int(M["m01"] / M["m00"])
+    return cX, cY
 
 
 def did_we_see_tape(stop_loc, image, bottomAux):
     blueAngle, blueOffset = bottomAux["blue"]
     yellowAngle, yellowOffset = bottomAux["yellow"]
-    STOPPING_RATIO = 8
+    STOPPING_RATIO = 9
     contours, _ = cv2.findContours(stop_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
     contour_sizes = list(map(cv2.contourArea, contours))
     print(contour_sizes)
-    contours = list(filter(lambda x: cv2.contourArea(x) > 300 and cv2.contourArea(x) < 1500, contours))
+    contours = list(filter(lambda x: cv2.contourArea(x) > 300 and cv2.contourArea(x) < 2000, contours))
     cv2.drawContours(image, contours, -1, (200, 30, 30), 0)
     if len(contours) > 0:
         rectangles = list(map(cv2.minAreaRect, contours))
@@ -116,17 +117,21 @@ def did_we_see_tape(stop_loc, image, bottomAux):
         ratios = list(map(get_box_ratio, boxes))
         print(ratios)
         ratio = get_box_ratio(boxes[0])
-        centroid = get_contour_centroid(contours[0])
+        centroid, centroidy  = get_contour_centroid(contours[0])
         within = True
         height = image.shape[0]
         width = image.shape[1]
         midx = int(width/2)
+        midy = int(width/2)
+        centroid = centroid - midx
         if blueAngle:
             if centroid - midx < blueOffset:
                 within = False
         if yellowAngle:
             if centroid - midx > yellowOffset:
                 within = False
+        print("within: ", within)
+        print(blueOffset, centroid, yellowOffset)
         if ratio >= STOPPING_RATIO and within:
             return True
     return False
@@ -175,8 +180,8 @@ def analyse_half(half, classified_image, image, show_camera):
     speed = 0
 
     # TUNE STEERING
-    angleMultiplier = 1.5
-    correctionOffset = 20
+    angleMultiplier = 1.4
+    correctionOffset = 15
 
     if midAngle:
         angle = int(midAngle)
@@ -197,7 +202,7 @@ def analyse_half(half, classified_image, image, show_camera):
     elif yellowAngle:
         angle = int(yellowAngle)
         offset = yellowOffset
-        steering_angle = max(angle * angleMultiplier - correctionOffset, -60)
+        steering_angle = max(angle * angleMultiplier - correctionOffset, -70)
         if offset < 0:
             steering_angle = -70
     else:
@@ -260,14 +265,14 @@ def avoidObstacles(contours, image, bottomAux, width, midx, height, steering_ang
         avoid_offset = blueOffset + (x - midx)
         avoid_offset = avoid_offset/2
         angle_radians = math.atan2(avoid_offset, height - (y+h))
-        steering_angle = -50
+        steering_angle = -20
         #steering_angle = int(math.degrees(angle_radians)) * 2
     else:
         avoid_offset = yellowOffset + (x + h - midx)
         avoid_offset = avoid_offset/2
         angle_radians = math.atan2(avoid_offset, height - (y+h))
         #steering_angle = int(math.degrees(angle_radians)) * 2
-        steering_angle = 50
+        steering_angle = 20
 
     return steering_angle
 
@@ -298,7 +303,7 @@ def decideBehaviour(bottom_angle, top_angle):
     else:
         # both tapes    
         # tune
-        steering_angle = (2*bottom_angle + top_angle)/3
+        steering_angle = bottom_angle
         swerve = top_angle * bottom_angle < 0
         largeDiff = abs(top_angle - bottom_angle) > 30
 

@@ -61,10 +61,10 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
         # ============= CONTROL THE CAR
         CAR.SendSteering(int(angle))
         send_speed = 10
-        TURBO_SPEED = 70
-        NORMAL_SPEED = 50
-        TURNING_SPEED = 45
-        OBSTACLE_SPEED = 55
+        TURBO_SPEED = 50
+        NORMAL_SPEED = 40
+        TURNING_SPEED = 25
+        OBSTACLE_SPEED = 50
 
         if speed == 0:
             send_speed = OBSTACLE_SPEED

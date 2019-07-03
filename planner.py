@@ -112,7 +112,7 @@ def collect_points(filename=None):
 
     # for each frame ask for blue points, yellow points and ground points
     gap()
-    for colour in ["blue", "red", "yellow", "other"]:
+    for colour in ["blue", "red", "yellow", "other", "green"]:
         Classifier = HMI(colour)
         total_data = pd.DataFrame()
 

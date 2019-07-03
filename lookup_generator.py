@@ -80,6 +80,8 @@ for sat, row in enumerate(lookupTable):
             lookupColors.append("red")
         elif col == 3:
             lookupColors.append("yellow")
+        elif col == 5:
+            lookupColors.append("green")
         else:
             lookupColors.append("black")
 

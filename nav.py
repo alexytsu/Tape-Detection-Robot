@@ -16,6 +16,9 @@ def get_box_ratio(box):
     dist_2 = math.sqrt((c1 - b1) ** 2 + (c2-b2)**2)
     return max(dist_1/dist_2, dist_2/dist_1)
 
+def get_tape_ratio(w, h):
+    return abs(w/h)
+
 def plan_steering(classified, image, show_camera):
 
     height = image.shape[0]
@@ -48,7 +51,7 @@ def plan_steering(classified, image, show_camera):
     #contour_sizes = list(map(cv2.contourArea, contours))
     #print(contour_sizes)
 
-    contours = list(filter(lambda x: cv2.contourArea(x) > 1500 and cv2.contourArea(x) < 10000, contours))
+    contours = list(filter(lambda x: cv2.contourArea(x) > 1500 and cv2.contourArea(x) < 30000, contours))
     contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
     if len(contours) > 0:
         steering_angle = avoidObstacles(contours, image, bottomAux, width, midx, height, steering_angle)
@@ -342,7 +345,7 @@ def analyseLineScatter(image, pointList, height, width):
     houghLines = []
 
     # LOWER NUMBER === MOREEE SPAGHETTIIII
-    SPAGHETTI = 16
+    SPAGHETTI = 12
 
     lines = cv2.HoughLines(blank_image, 2, np.pi / 200, SPAGHETTI, None, 0, 0)
     if lines is not None:

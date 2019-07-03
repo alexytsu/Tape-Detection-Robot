@@ -36,7 +36,7 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
             continue
 
         # ============= RESIZE AND FLATTEN THE FRAME
-        frame = cv2.resize(frame, (320, 240), interpolation = cv2.INTER_AREA)
+        frame = cv2.resize(frame, (480, 360), interpolation = cv2.INTER_AREA)
         tape_frame = applyIPT(frame, mapping, translation, crop)
 
         # ============= CLASSIFY THE COLORS
@@ -46,7 +46,7 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
         angle, speed, saw_tape = plan_steering(colors, tape_frame, ARGS.show_camera)
         if saw_tape:
             tape_count += 2
-            if tape_count >= 3:
+            if tape_count >= 5:
                 CAR.SendThrottle(0)
                 CAR.SendThrottle(0)
                 CAR.SendThrottle(0)
@@ -61,10 +61,10 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
         # ============= CONTROL THE CAR
         CAR.SendSteering(int(angle))
         send_speed = 10
-        TURBO_SPEED = 45
-        NORMAL_SPEED = 40
-        TURNING_SPEED = 25
-        OBSTACLE_SPEED = 70
+        TURBO_SPEED = 70
+        NORMAL_SPEED = 50
+        TURNING_SPEED = 45
+        OBSTACLE_SPEED = 55
 
         if speed == 0:
             send_speed = OBSTACLE_SPEED

@@ -116,7 +116,7 @@ def did_we_see_tape(stop_loc, image, bottomAux):
         ratios = list(map(get_box_ratio, boxes))
         print(ratios)
         ratio = get_box_ratio(boxes[0])
-        centroid = get_contour_centroid(cnt)
+        centroid = get_contour_centroid(contours[0])
         within = True
         height = image.shape[0]
         width = image.shape[1]

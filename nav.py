@@ -66,8 +66,7 @@ def plan_steering(classified, image, show_camera):
     """
     saw_tape = False
     stop_loc = (imagified == 5).astype(int)
-    saw_tape = did_we_see_tape(stop_loc, image)
-
+    saw_tape = did_we_see_tape(stop_loc, image, bottomAux)
 
 
     angle = 0
@@ -93,7 +92,15 @@ def plan_steering(classified, image, show_camera):
 
     return steering_angle, speed, saw_tape
 
-def did_we_see_tape(stop_loc, image):
+def get_contour_centroid(cnt):
+    M = cv2.moments(cnt)
+    cX = int(M["m10"] / M["m00"])
+    return cX
+
+
+def did_we_see_tape(stop_loc, image, bottomAux):
+    blueAngle, blueOffset = bottomAux["blue"]
+    yellowAngle, yellowOffset = bottomAux["yellow"]
     STOPPING_RATIO = 8
     contours, _ = cv2.findContours(stop_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
@@ -109,7 +116,18 @@ def did_we_see_tape(stop_loc, image):
         ratios = list(map(get_box_ratio, boxes))
         print(ratios)
         ratio = get_box_ratio(boxes[0])
-        if ratio >= STOPPING_RATIO:
+        centroid = get_contour_centroid(cnt)
+        within = True
+        height = image.shape[0]
+        width = image.shape[1]
+        midx = int(width/2)
+        if blueAngle:
+            if centroid - midx < blueOffset:
+                within = False
+        if yellowAngle:
+            if centroid - midx > yellowOffset:
+                within = False
+        if ratio >= STOPPING_RATIO and within:
             return True
     return False
 

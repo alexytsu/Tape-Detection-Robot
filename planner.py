@@ -15,7 +15,7 @@ def get_spaced_frames(filename, length, get_n):
 
     filepath = os.path.join("footage", filename)
     print(f"From a file of {length} frames we want {get_n} frames")
-    spacing = int((length-100)/get_n)
+    spacing = int((length)/get_n)
     print("Spacing: ", spacing)
 
     # initialise loop

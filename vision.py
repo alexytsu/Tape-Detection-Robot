@@ -85,6 +85,8 @@ def mask_lookup(image, color_table):
 def get_edges(frame, show_debug):
     dimensions = frame.shape
     edges = cv2.Canny(frame, 50, 250)
+    kernel = np.ones((5,5), np.uint8)
+    edges = cv2.dilate(edges, kernel, iterations=4 )
     return edges
 
 def get_color_lookup(filename="LOOKUP.pkl"):

@@ -62,13 +62,11 @@ def test_model(color_table, filename=None):
         # preprocess
         edges = get_edges(frame, True)
         edges = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
-        # frame = edges & frame
+        frame = edges & frame
 
         full_ynew = mask_lookup(frame, color_table)
-        """
         mask_image = show_masks(full_ynew, frame, "full", w, h)
         cv2.imshow("mask", mask_image)
-        """
 
 
         # classify

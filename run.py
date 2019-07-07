@@ -11,6 +11,7 @@ from car import Car
 
 ARGS = None
 
+
 def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, car):
 
     prev_frame = 0
@@ -45,31 +46,28 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
 
         # ============= MAKE A STEERING DECISION
         angle, speed, saw_tape = plan_steering(colors, tape_frame, ARGS.show_camera)
+        frames += 1
+        print(frames)
         if saw_tape:
-            if frames < 2000:
-                threshold = 100
+            if frames < 900:
+                threshold = 3
             else:
                 threshold = 3
             tape_count += 2
             if tape_count >= threshold:
-                CAR.SendThrottle(0)
-                CAR.SendThrottle(0)
-                CAR.SendThrottle(0)
-                video.stop()
-                exit()
+                stop_frame = frames + 20
         else:
             tape_count -= 1
             tape_count = max(0, tape_count)
-        print("tape_count: ", tape_count)
 
 
         # ============= CONTROL THE CAR
         CAR.SendSteering(int(angle))
         send_speed = 10
-        TURBO_SPEED = 50
-        NORMAL_SPEED = 40
-        TURNING_SPEED = 25
-        OBSTACLE_SPEED = 40
+        TURBO_SPEED = 70
+        NORMAL_SPEED = 50
+        TURNING_SPEED = 35
+        OBSTACLE_SPEED = 25
 
         if speed == 0:
             send_speed = OBSTACLE_SPEED
@@ -82,6 +80,9 @@ def run(video, arduino, color_lookup, mapping, translation, crop, crop_other, ca
 
         if saw_tape:
             send_speed = TURNING_SPEED
+
+        if frames < 20:
+            send_speed = 90
 
         CAR.SendThrottle(send_speed)
 

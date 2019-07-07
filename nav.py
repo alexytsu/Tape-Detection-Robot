@@ -102,11 +102,10 @@ def get_contour_centroid(cnt):
 def did_we_see_tape(stop_loc, image, bottomAux):
     blueAngle, blueOffset = bottomAux["blue"]
     yellowAngle, yellowOffset = bottomAux["yellow"]
-    STOPPING_RATIO = 9
+    STOPPING_RATIO = 8
     contours, _ = cv2.findContours(stop_loc, cv2.RETR_CCOMP, cv2.CHAIN_APPROX_SIMPLE)
     contours = sorted(contours, key= lambda x: cv2.contourArea(x), reverse=False)
     contour_sizes = list(map(cv2.contourArea, contours))
-    print(contour_sizes)
     contours = list(filter(lambda x: cv2.contourArea(x) > 300 and cv2.contourArea(x) < 2000, contours))
     cv2.drawContours(image, contours, -1, (200, 30, 30), 0)
     if len(contours) > 0:
@@ -115,7 +114,6 @@ def did_we_see_tape(stop_loc, image, bottomAux):
         boxes = list(map(np.int0, boxes))
         boxes = sorted(boxes, key=get_box_ratio, reverse=True)
         ratios = list(map(get_box_ratio, boxes))
-        print(ratios)
         ratio = get_box_ratio(boxes[0])
         centroid, centroidy  = get_contour_centroid(contours[0])
         within = True
@@ -125,10 +123,10 @@ def did_we_see_tape(stop_loc, image, bottomAux):
         midy = int(width/2)
         centroid = centroid - midx
         if blueAngle:
-            if centroid - midx < blueOffset:
+            if centroid < blueOffset:
                 within = False
         if yellowAngle:
-            if centroid - midx > yellowOffset:
+            if centroid > yellowOffset:
                 within = False
         print("within: ", within)
         print(blueOffset, centroid, yellowOffset)
@@ -180,8 +178,8 @@ def analyse_half(half, classified_image, image, show_camera):
     speed = 0
 
     # TUNE STEERING
-    angleMultiplier = 1.4
-    correctionOffset = 15
+    angleMultiplier = 1.8
+    correctionOffset = 20
 
     if midAngle:
         angle = int(midAngle)
@@ -196,9 +194,9 @@ def analyse_half(half, classified_image, image, show_camera):
     elif blueAngle:
         angle = int(blueAngle)
         offset = blueOffset
-        steering_angle = min(angle * angleMultiplier + correctionOffset, 60)
+        steering_angle = min(angle * angleMultiplier +int( correctionOffset/2), 60)
         if offset > 0:
-            steering_angle = 60
+            steering_angle = 30
     elif yellowAngle:
         angle = int(yellowAngle)
         offset = yellowOffset
@@ -265,7 +263,7 @@ def avoidObstacles(contours, image, bottomAux, width, midx, height, steering_ang
         avoid_offset = blueOffset + (x - midx)
         avoid_offset = avoid_offset/2
         angle_radians = math.atan2(avoid_offset, height - (y+h))
-        steering_angle = -20
+        steering_angle = -15
         #steering_angle = int(math.degrees(angle_radians)) * 2
     else:
         avoid_offset = yellowOffset + (x + h - midx)
@@ -368,7 +366,7 @@ def analyseLineScatter(image, pointList, height, width):
     houghLines = []
 
     # LOWER NUMBER === MOREEE SPAGHETTIIII
-    SPAGHETTI = 12
+    SPAGHETTI = 14
 
     lines = cv2.HoughLines(blank_image, 2, np.pi / 200, SPAGHETTI, None, 0, 0)
     if lines is not None:
